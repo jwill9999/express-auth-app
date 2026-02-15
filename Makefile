@@ -2,7 +2,7 @@
 #  Express Auth API — Makefile
 # ──────────────────────────────────────────────
 
-.PHONY: help install dev start build test \
+.PHONY: help install dev start build test test-watch test-coverage \
         lint lint-fix lint-deps format format-check typecheck validate \
         docker-up docker-down docker-logs docker-prod-up docker-prod-down docker-prod-logs \
         clean
@@ -51,6 +51,12 @@ typecheck: ## Type-check without emitting (tsc --noEmit)
 
 test: ## Run test suite
 	npm test
+
+test-watch: ## Run tests in watch mode
+	npm run test:watch
+
+test-coverage: ## Run tests with coverage report
+	npm run test:coverage
 
 validate: ## Run all checks (typecheck + lint + boundaries + format)
 	npm run validate
