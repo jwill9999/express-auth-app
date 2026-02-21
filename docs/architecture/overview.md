@@ -26,14 +26,17 @@ The Express Auth API is a modern, TypeScript-based authentication service built 
 │  Controllers · Middleware · Routes · Swagger        │
 ├────────────────────────────────────────────────────┤
 │  Application Layer (Use Cases)                     │
-│  RegisterUser · LoginUser · Ports (interfaces)     │
+│  RegisterUser · LoginUser · RefreshSession ·       │
+│  LogoutCurrentSession · LogoutAllSessions ·        │
+│  AdminRevokeSessions · Ports (interfaces)          │
 ├────────────────────────────────────────────────────┤
 │  Domain Layer (Pure Business Core)                 │
 │  User entity · AuthToken · Domain errors           │
 ├────────────────────────────────────────────────────┤
 │  Infrastructure Layer (Adapters)                   │
-│  MongoUserRepository · JwtTokenProvider · Bcrypt   │
-│  Passport (Google OAuth) · MongoDB connection      │
+│  MongoUserRepository · MongoRefreshSessionRepo ·   │
+│  JwtTokenProvider · JwtRefreshTokenProvider ·      │
+│  Bcrypt · Passport (Google OAuth) · MongoDB        │
 └──────────┬─────────────────────────────────────────┘
            │
            ▼
@@ -101,7 +104,10 @@ See [Clean Architecture Guidelines](./clean-architecture-guidelines.md) for full
 
 ### 3. Security by Default
 - Passwords hashed with bcrypt (10 salt rounds)
-- JWT tokens with configurable expiration
+- Short-lived access tokens (5m) with rotating refresh tokens (7d)
+- Refresh tokens stored as SHA-256 hashes in httpOnly cookies
+- Token reuse detection with family-wide revocation
+- Per-session, all-device, and admin-forced logout
 - CORS configured for specific origins
 - Environment-based secrets
 - Input validation on all endpoints
@@ -124,10 +130,16 @@ See [Clean Architecture Guidelines](./clean-architecture-guidelines.md) for full
 ### Authentication Flow
 1. User registers or logs in
 2. Credentials validated
-3. JWT token generated and returned
-4. Client includes token in Authorization header
-5. Middleware verifies token on protected routes
-6. Request proceeds if valid, 401 if invalid
+3. Short-lived access token (5m) generated and returned in response body
+4. Refresh token generated and set as secure httpOnly cookie
+5. Refresh session (SHA-256 hash of token) persisted in MongoDB
+6. Client includes access token in `Authorization: Bearer` header
+7. Middleware verifies token on protected routes
+8. When access token expires, client calls `POST /auth/refresh` with cookie
+9. Old refresh token is revoked, new token pair issued (rotation)
+10. If a rotated token is replayed, the entire token family is revoked (reuse detection)
+
+See [Authentication Architecture](./authentication.md) for full details.
 
 ### OAuth Flow (Google)
 1. Client initiates OAuth flow
@@ -192,9 +204,12 @@ The application supports multiple environments:
    - Configurable salt rounds
 
 2. **Token Security**
-   - JWT with signed payload
-   - Configurable expiration
-   - Secret stored in environment
+   - Dual-token system: short-lived access + rotating refresh
+   - Access tokens: JWT with 5m default expiry
+   - Refresh tokens: httpOnly secure cookie, SHA-256 hashed in DB
+   - Token rotation on every refresh
+   - Reuse detection with family-wide revocation
+   - See [Authentication Architecture](./authentication.md)
 
 3. **Session Security**
    - Secure session cookies (OAuth)
@@ -222,7 +237,6 @@ The application supports multiple environments:
 
 See [Roadmap](../planning/roadmap.md) and [Backlog](../planning/backlog.md) for planned improvements:
 - Rate limiting
-- Refresh tokens
 - Email verification
 - Two-factor authentication
 - Admin dashboard
@@ -231,5 +245,5 @@ See [Roadmap](../planning/roadmap.md) and [Backlog](../planning/backlog.md) for 
 
 ---
 
-**Last Updated:** 2026-02-15  
+**Last Updated:** 2026-02-21  
 **Author:** Development Team

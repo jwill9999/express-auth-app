@@ -130,12 +130,12 @@ userSchema.pre('save', async function() {
 
 ## Data Relationships
 
-Currently, the application has a single collection with no relationships. Future expansions may include:
+The application has two collections:
 
-- **Sessions** collection (for refresh tokens)
-- **LoginHistory** collection (audit trail)
-- **ResetTokens** collection (password reset)
-- **EmailVerification** collection (email confirmation)
+- **Users** — user accounts (email/password and OAuth)
+- **RefreshSessions** — active and revoked refresh token sessions, linked to users by `userId`
+
+See [Authentication Architecture](./authentication.md) for the RefreshSession schema and lifecycle.
 
 ## Query Patterns
 
@@ -216,6 +216,6 @@ See [Backlog](../planning/backlog.md) for planned schema additions:
 
 ---
 
-**Last Updated:** 2026-02-15  
-**Schema Version:** 1.0  
+**Last Updated:** 2026-02-21  
+**Schema Version:** 1.1  
 **Mongoose Version:** 9.2.1
