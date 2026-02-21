@@ -1,7 +1,6 @@
 import { RefreshSession } from '../../../domain/auth/RefreshSession.js';
 import {
   SessionNotFoundError,
-  SessionRevokedError,
   SessionExpiredError,
   TokenReuseDetectedError,
   ValidationError,

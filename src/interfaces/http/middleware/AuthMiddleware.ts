@@ -9,8 +9,13 @@ export function createAuthMiddleware(tokenProvider: TokenProvider): RequestHandl
   return (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthRequest;
     try {
-      const token = authReq.headers.authorization?.split(' ')[1];
+      const authHeader = authReq.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, message: 'No token provided' });
+        return;
+      }
 
+      const token = authHeader.slice(7);
       if (!token) {
         res.status(401).json({ success: false, message: 'No token provided' });
         return;
