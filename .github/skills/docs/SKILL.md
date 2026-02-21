@@ -1,6 +1,6 @@
 ---
 name: docs
-description: Describe what this skill does and when to use it. Include keywords that help agents identify relevant tasks.
+description: Update, create, or maintain project documentation in the docs/ folder. Use this skill when writing or editing README files, API endpoint docs, architecture docs, changelog entries, setup guides, troubleshooting guides, backlog items, planning indexes, or any markdown documentation. Triggers on tasks involving docs, documentation, changelog, backlog, roadmap, guides, API reference, or endpoint examples.
 ---
 
 # Documentation Instructions
