@@ -21,6 +21,7 @@ import passport from 'passport';
 import { RegisterUser } from './application/auth/use-cases/RegisterUser.js';
 import { LoginUser } from './application/auth/use-cases/LoginUser.js';
 import { CreateRefreshSession } from './application/auth/use-cases/CreateRefreshSession.js';
+import { GoogleOAuthLogin } from './application/auth/use-cases/GoogleOAuthLogin.js';
 import { RefreshSessionUseCase } from './application/auth/use-cases/RefreshSession.js';
 import { LogoutCurrentSession } from './application/auth/use-cases/LogoutCurrentSession.js';
 import { LogoutAllSessions } from './application/auth/use-cases/LogoutAllSessions.js';
@@ -77,6 +78,7 @@ const refreshSessionUseCase = new RefreshSessionUseCase(
 const logoutCurrentSession = new LogoutCurrentSession(sessionRepo, refreshTokenProvider);
 const logoutAllSessions = new LogoutAllSessions(sessionRepo);
 const adminRevokeSessions = new AdminRevokeSessions(sessionRepo);
+const googleOAuthLogin = new GoogleOAuthLogin(tokenProvider, createRefreshSession);
 
 // Middleware
 const authMiddleware = createAuthMiddleware(tokenProvider);
@@ -90,7 +92,7 @@ const authController = new AuthController(
   logoutCurrentSession,
   logoutAllSessions,
   adminRevokeSessions,
-  createRefreshSession,
+  googleOAuthLogin,
   config.adminUserIds,
 );
 const protectedController = new ProtectedController(authMiddleware);

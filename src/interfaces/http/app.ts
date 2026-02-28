@@ -7,7 +7,7 @@ import type { LogoutCurrentSession } from '../../application/auth/use-cases/Logo
 import type { LogoutAllSessions } from '../../application/auth/use-cases/LogoutAllSessions.js';
 import type { AdminRevokeSessions } from '../../application/auth/use-cases/AdminRevokeSessions.js';
 import type { TokenProvider } from '../../application/auth/ports/TokenProvider.js';
-import type { CreateRefreshSession } from '../../application/auth/use-cases/CreateRefreshSession.js';
+import type { GoogleOAuthLogin } from '../../application/auth/use-cases/GoogleOAuthLogin.js';
 import { AuthController } from './controllers/AuthController.js';
 import { ProtectedController } from './controllers/ProtectedController.js';
 import { createAuthMiddleware } from './middleware/AuthMiddleware.js';
@@ -21,7 +21,7 @@ export interface AppDependencies {
   logoutCurrentSession?: LogoutCurrentSession;
   logoutAllSessions?: LogoutAllSessions;
   adminRevokeSessions?: AdminRevokeSessions;
-  createRefreshSession?: CreateRefreshSession;
+  googleOAuthLogin?: GoogleOAuthLogin;
   adminUserIds?: string[];
 }
 
@@ -41,7 +41,7 @@ export function createApp(deps: AppDependencies): Application {
     deps.logoutCurrentSession,
     deps.logoutAllSessions,
     deps.adminRevokeSessions,
-    deps.createRefreshSession,
+    deps.googleOAuthLogin,
     deps.adminUserIds,
   );
   const protectedController = new ProtectedController(authMiddleware);

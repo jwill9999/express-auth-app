@@ -7,7 +7,7 @@ import type { LogoutCurrentSession } from '../../../application/auth/use-cases/L
 import type { LogoutAllSessions } from '../../../application/auth/use-cases/LogoutAllSessions.js';
 import type { AdminRevokeSessions } from '../../../application/auth/use-cases/AdminRevokeSessions.js';
 import type { TokenProvider } from '../../../application/auth/ports/TokenProvider.js';
-import type { CreateRefreshSession } from '../../../application/auth/use-cases/CreateRefreshSession.js';
+import type { GoogleOAuthLogin } from '../../../application/auth/use-cases/GoogleOAuthLogin.js';
 import { User } from '../../../domain/auth/User.js';
 import {
   InvalidCredentialsError,
@@ -38,7 +38,7 @@ export class AuthController {
     private logoutCurrentSession?: LogoutCurrentSession,
     private logoutAllSessions?: LogoutAllSessions,
     private adminRevokeSessions?: AdminRevokeSessions,
-    private createRefreshSession?: CreateRefreshSession,
+    private googleOAuthLogin?: GoogleOAuthLogin,
     private adminUserIds?: string[],
     private cookieOptions?: CookieOptions,
   ) {
@@ -387,24 +387,22 @@ export class AuthController {
   }
 
   private async googleCallback(req: Request, res: Response): Promise<void> {
-    const user = req.user as User;
-    const token = this.tokenProvider.generate(user.id, user.email);
+    if (!this.googleOAuthLogin) {
+      res.status(501).json({ success: false, message: 'Google OAuth not configured' });
+      return;
+    }
 
-    let refreshToken: string | undefined;
-    if (this.createRefreshSession) {
-      refreshToken = await this.createRefreshSession.execute(user.id);
-      this.setRefreshTokenCookie(res, refreshToken);
+    const user = req.user as User;
+    const result = await this.googleOAuthLogin.execute(user);
+
+    if (result.refreshToken) {
+      this.setRefreshTokenCookie(res, result.refreshToken);
     }
 
     res.json({
       success: true,
       message: 'Google login successful',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      ...result,
     });
   }
 
