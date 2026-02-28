@@ -17,7 +17,8 @@ This document tracks all features, changes, and additions to the project with ti
 | 5   | CORS Configuration              | 2026-02-15 | 🔴 High   | ✅ Complete | Secure cross-origin     | [↓](#cors-configuration---2026-02-15)              |
 | 6   | Mongoose 9 Compatibility Fix    | 2026-02-15 | 🔴 High   | ✅ Complete | Registration working    | [↓](#mongoose-9-compatibility-fix---2026-02-15)    |
 | 7   | Initial Project Setup           | 2026-02-14 | 🔴 High   | ✅ Complete | Core auth system        | [↓](#initial-project-setup---2026-02-14)           |
-| 8   | JWT Lifecycle Hardening         | 2026-02-21 | 🔴 High   | ✅ Complete | Secure token lifecycle  | [↓](#jwt-lifecycle-hardening---2026-02-21)         |
+| 8   | Feature Planning Skill          | 2026-02-21 | 🟡 Medium | ✅ Complete | Structured planning     | [↓](#feature-planning-skill---2026-02-21)          |
+| 9   | JWT Lifecycle Hardening         | 2026-02-21 | 🔴 High   | ✅ Complete | Secure token lifecycle  | [↓](#jwt-lifecycle-hardening---2026-02-21)         |
 
 > **Note:** When completed features exceed 15 items, individual features will be moved to separate files in `completed/` directory.
 
@@ -309,6 +310,38 @@ Initial project setup with Express, MongoDB, JWT authentication, and Google OAut
 
 ---
 
+### Feature Planning Skill - 2026-02-21
+**Status:** ✅ Completed  
+**Author:** Development Team  
+**Priority:** 🟡 Medium  
+
+**Description:**  
+Added a new Copilot skill (`feature-planning`) that provides a structured workflow for breaking down feature requirements into trackable sub-tasks linked to project documentation. Each sub-task is tagged by architecture layer and references the docs it will affect.
+
+**Changes:**
+- Created `.github/skills/feature-planning/SKILL.md` with skill definition, workflow, and conventions
+- Created `docs/planning/features/` directory for individual feature plans
+- Created `docs/planning/features/_template.md` as a reusable feature plan template
+- Created `docs/planning/features/README.md` explaining the feature planning process
+- Updated `docs/README.md` to include feature plans in documentation structure
+
+**Files Added:**
+- `.github/skills/feature-planning/SKILL.md`
+- `docs/planning/features/README.md`
+- `docs/planning/features/_template.md`
+
+**Impact:**
+- ✅ Structured workflow for planning new features
+- ✅ Sub-tasks linked to architecture layers and documentation
+- ✅ Reusable template for consistent feature plans
+- ✅ Integration with existing docs skill
+
+**Related Docs:**
+- [Feature Plans](../planning/features/)
+- [Backlog](../planning/backlog.md)
+
+---
+
 ### JWT Lifecycle Hardening - 2026-02-21
 **Status:** ✅ Completed  
 **Author:** Development Team  
@@ -372,7 +405,7 @@ Added full refresh token lifecycle with rotating tokens, reuse detection, and re
 
 ## Summary Statistics
 
-**Total Features Completed:** 7  
+**Total Features Completed:** 9  
 **Total Files Created:** 40+  
 **Total Lines of Code:** ~3,500+  
 **Test Coverage:** Manual testing (automated tests pending)  
