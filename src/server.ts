@@ -113,10 +113,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-if (!config.sessionSecret) {
-  throw new Error('SESSION_SECRET is not defined in environment variables');
-}
-
 app.use(
   session({
     secret: config.sessionSecret,
