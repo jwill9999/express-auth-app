@@ -7,9 +7,7 @@ import type { LogoutCurrentSession } from '../../../application/auth/use-cases/L
 import type { LogoutAllSessions } from '../../../application/auth/use-cases/LogoutAllSessions.js';
 import type { AdminRevokeSessions } from '../../../application/auth/use-cases/AdminRevokeSessions.js';
 import type { TokenProvider } from '../../../application/auth/ports/TokenProvider.js';
-import type { RefreshTokenProvider } from '../../../application/auth/ports/RefreshTokenProvider.js';
-import type { RefreshSessionRepository } from '../../../application/auth/ports/RefreshSessionRepository.js';
-import { RefreshSession } from '../../../domain/auth/RefreshSession.js';
+import type { CreateRefreshSession } from '../../../application/auth/use-cases/CreateRefreshSession.js';
 import { User } from '../../../domain/auth/User.js';
 import {
   InvalidCredentialsError,
@@ -40,9 +38,7 @@ export class AuthController {
     private logoutCurrentSession?: LogoutCurrentSession,
     private logoutAllSessions?: LogoutAllSessions,
     private adminRevokeSessions?: AdminRevokeSessions,
-    private refreshTokenProvider?: RefreshTokenProvider,
-    private sessionRepo?: RefreshSessionRepository,
-    private refreshTokenTtlMs?: number,
+    private createRefreshSession?: CreateRefreshSession,
     private cookieOptions?: CookieOptions,
   ) {
     this.router = Router();
@@ -60,7 +56,7 @@ export class AuthController {
         secure: true,
         sameSite: 'strict',
         path: '/auth',
-        maxAge: this.refreshTokenTtlMs ?? 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       }
     );
   }
@@ -372,19 +368,8 @@ export class AuthController {
     const token = this.tokenProvider.generate(user.id, user.email);
 
     let refreshToken: string | undefined;
-    if (this.refreshTokenProvider && this.sessionRepo && this.refreshTokenTtlMs) {
-      const tokenFamily = crypto.randomUUID();
-      refreshToken = this.refreshTokenProvider.generateRefreshToken(user.id, tokenFamily);
-      const tokenHash = this.refreshTokenProvider.hashToken(refreshToken);
-      const session = new RefreshSession(
-        '',
-        user.id,
-        tokenFamily,
-        tokenHash,
-        new Date(Date.now() + this.refreshTokenTtlMs),
-        new Date(),
-      );
-      await this.sessionRepo.save(session);
+    if (this.createRefreshSession) {
+      refreshToken = await this.createRefreshSession.execute(user.id);
       this.setRefreshTokenCookie(res, refreshToken);
     }
 

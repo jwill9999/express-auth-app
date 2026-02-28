@@ -7,8 +7,7 @@ import type { LogoutCurrentSession } from '../../application/auth/use-cases/Logo
 import type { LogoutAllSessions } from '../../application/auth/use-cases/LogoutAllSessions.js';
 import type { AdminRevokeSessions } from '../../application/auth/use-cases/AdminRevokeSessions.js';
 import type { TokenProvider } from '../../application/auth/ports/TokenProvider.js';
-import type { RefreshTokenProvider } from '../../application/auth/ports/RefreshTokenProvider.js';
-import type { RefreshSessionRepository } from '../../application/auth/ports/RefreshSessionRepository.js';
+import type { CreateRefreshSession } from '../../application/auth/use-cases/CreateRefreshSession.js';
 import { AuthController } from './controllers/AuthController.js';
 import { ProtectedController } from './controllers/ProtectedController.js';
 import { createAuthMiddleware } from './middleware/AuthMiddleware.js';
@@ -22,9 +21,7 @@ export interface AppDependencies {
   logoutCurrentSession?: LogoutCurrentSession;
   logoutAllSessions?: LogoutAllSessions;
   adminRevokeSessions?: AdminRevokeSessions;
-  refreshTokenProvider?: RefreshTokenProvider;
-  sessionRepo?: RefreshSessionRepository;
-  refreshTokenTtlMs?: number;
+  createRefreshSession?: CreateRefreshSession;
 }
 
 export function createApp(deps: AppDependencies): Application {
@@ -43,9 +40,7 @@ export function createApp(deps: AppDependencies): Application {
     deps.logoutCurrentSession,
     deps.logoutAllSessions,
     deps.adminRevokeSessions,
-    deps.refreshTokenProvider,
-    deps.sessionRepo,
-    deps.refreshTokenTtlMs,
+    deps.createRefreshSession,
   );
   const protectedController = new ProtectedController(authMiddleware);
 

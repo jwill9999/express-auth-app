@@ -20,6 +20,7 @@ import passport from 'passport';
 // Application
 import { RegisterUser } from './application/auth/use-cases/RegisterUser.js';
 import { LoginUser } from './application/auth/use-cases/LoginUser.js';
+import { CreateRefreshSession } from './application/auth/use-cases/CreateRefreshSession.js';
 import { RefreshSessionUseCase } from './application/auth/use-cases/RefreshSession.js';
 import { LogoutCurrentSession } from './application/auth/use-cases/LogoutCurrentSession.js';
 import { LogoutAllSessions } from './application/auth/use-cases/LogoutAllSessions.js';
@@ -54,22 +55,18 @@ const passwordHasher = new BcryptPasswordHasher();
 configurePassport(config.google, userRepo);
 
 // Use cases
+const createRefreshSession = new CreateRefreshSession(
+  sessionRepo,
+  refreshTokenProvider,
+  config.refreshTokenTtlMs,
+);
 const registerUser = new RegisterUser(
   userRepo,
   passwordHasher,
   tokenProvider,
-  sessionRepo,
-  refreshTokenProvider,
-  config.refreshTokenTtlMs,
+  createRefreshSession,
 );
-const loginUser = new LoginUser(
-  userRepo,
-  passwordHasher,
-  tokenProvider,
-  sessionRepo,
-  refreshTokenProvider,
-  config.refreshTokenTtlMs,
-);
+const loginUser = new LoginUser(userRepo, passwordHasher, tokenProvider, createRefreshSession);
 const refreshSessionUseCase = new RefreshSessionUseCase(
   sessionRepo,
   refreshTokenProvider,
@@ -93,9 +90,7 @@ const authController = new AuthController(
   logoutCurrentSession,
   logoutAllSessions,
   adminRevokeSessions,
-  refreshTokenProvider,
-  sessionRepo,
-  config.refreshTokenTtlMs,
+  createRefreshSession,
 );
 const protectedController = new ProtectedController(authMiddleware);
 

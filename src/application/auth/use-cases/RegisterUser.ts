@@ -1,21 +1,17 @@
 import { User } from '../../../domain/auth/User.js';
-import { RefreshSession } from '../../../domain/auth/RefreshSession.js';
 import { UserAlreadyExistsError, ValidationError } from '../../../domain/auth/errors.js';
 import type { UserRepository } from '../ports/UserRepository.js';
 import type { PasswordHasher } from '../ports/PasswordHasher.js';
 import type { TokenProvider } from '../ports/TokenProvider.js';
-import type { RefreshSessionRepository } from '../ports/RefreshSessionRepository.js';
-import type { RefreshTokenProvider } from '../ports/RefreshTokenProvider.js';
 import type { RegisterDTO } from '../dtos/RegisterDTO.js';
+import type { CreateRefreshSession } from './CreateRefreshSession.js';
 
 export class RegisterUser {
   constructor(
     private userRepo: UserRepository,
     private passwordHasher: PasswordHasher,
     private tokenProvider: TokenProvider,
-    private sessionRepo?: RefreshSessionRepository,
-    private refreshTokenProvider?: RefreshTokenProvider,
-    private refreshTokenTtlMs?: number,
+    private createRefreshSession?: CreateRefreshSession,
   ) {}
 
   async execute(input: RegisterDTO) {
@@ -50,19 +46,8 @@ export class RegisterUser {
     const token = this.tokenProvider.generate(savedUser.id, savedUser.email);
 
     let refreshToken: string | undefined;
-    if (this.sessionRepo && this.refreshTokenProvider && this.refreshTokenTtlMs) {
-      const tokenFamily = crypto.randomUUID();
-      refreshToken = this.refreshTokenProvider.generateRefreshToken(savedUser.id, tokenFamily);
-      const tokenHash = this.refreshTokenProvider.hashToken(refreshToken);
-      const session = new RefreshSession(
-        '',
-        savedUser.id,
-        tokenFamily,
-        tokenHash,
-        new Date(Date.now() + this.refreshTokenTtlMs),
-        new Date(),
-      );
-      await this.sessionRepo.save(session);
+    if (this.createRefreshSession) {
+      refreshToken = await this.createRefreshSession.execute(savedUser.id);
     }
 
     return {
