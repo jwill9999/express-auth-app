@@ -49,8 +49,7 @@ describe('RefreshSession Use Case', () => {
           ),
         ),
       findByTokenHash: vi.fn().mockResolvedValue(existingSession),
-      findByTokenHashAndRevoke: vi.fn().mockResolvedValue(existingSession),
-      revokeById: vi.fn().mockResolvedValue(undefined),
+      revokeById: vi.fn().mockResolvedValue(true),
       revokeByFamily: vi.fn().mockResolvedValue(undefined),
       revokeAllByUserId: vi.fn().mockResolvedValue(undefined),
     };
@@ -89,7 +88,7 @@ describe('RefreshSession Use Case', () => {
     expect(result.accessToken).toBe('new-access-token');
     expect(result.refreshToken).toBe('new-refresh-token');
     expect(result.user.id).toBe('user-1');
-    expect(sessionRepo.findByTokenHashAndRevoke).toHaveBeenCalled();
+    expect(sessionRepo.revokeById).toHaveBeenCalledWith('sess-1');
     expect(sessionRepo.save).toHaveBeenCalled();
   });
 
@@ -105,7 +104,7 @@ describe('RefreshSession Use Case', () => {
   });
 
   it('should detect reuse when token not in DB and revoke family', async () => {
-    vi.mocked(sessionRepo.findByTokenHashAndRevoke).mockResolvedValue(null);
+    vi.mocked(sessionRepo.findByTokenHash).mockResolvedValue(null);
 
     await expect(useCase.execute({ refreshToken: 'old-refresh-token' })).rejects.toThrow(
       TokenReuseDetectedError,
@@ -123,7 +122,7 @@ describe('RefreshSession Use Case', () => {
       new Date(),
       true,
     );
-    vi.mocked(sessionRepo.findByTokenHashAndRevoke).mockResolvedValue(revokedSession);
+    vi.mocked(sessionRepo.findByTokenHash).mockResolvedValue(revokedSession);
 
     await expect(useCase.execute({ refreshToken: 'old-refresh-token' })).rejects.toThrow(
       TokenReuseDetectedError,
@@ -141,7 +140,7 @@ describe('RefreshSession Use Case', () => {
       new Date(),
       false,
     );
-    vi.mocked(sessionRepo.findByTokenHashAndRevoke).mockResolvedValue(expiredSession);
+    vi.mocked(sessionRepo.findByTokenHash).mockResolvedValue(expiredSession);
 
     await expect(useCase.execute({ refreshToken: 'old-refresh-token' })).rejects.toThrow(
       SessionExpiredError,
@@ -156,23 +155,15 @@ describe('RefreshSession Use Case', () => {
     );
   });
 
-  it('should throw TokenReuseDetectedError and revoke family when a concurrent request already rotated the token', async () => {
-    // Simulate findByTokenHashAndRevoke returning a session that was already revoked
-    // (another request won the race and revoked it first)
-    const alreadyRevokedSession = new RefreshSession(
-      'sess-1',
-      'user-1',
-      'family-1',
-      'hash-of-old-token',
-      futureDate,
-      new Date(),
-      true, // revoked: true — concurrent request already consumed this token
-    );
-    vi.mocked(sessionRepo.findByTokenHashAndRevoke).mockResolvedValue(alreadyRevokedSession);
+  it('should throw SessionNotFoundError (not TokenReuseDetectedError) when a concurrent request already rotated the token', async () => {
+    // Simulate revokeById returning false — another request already consumed this token
+    vi.mocked(sessionRepo.revokeById).mockResolvedValue(false);
 
     await expect(useCase.execute({ refreshToken: 'old-refresh-token' })).rejects.toThrow(
-      TokenReuseDetectedError,
+      SessionNotFoundError,
     );
-    expect(sessionRepo.revokeByFamily).toHaveBeenCalledWith('family-1');
+    // The family must NOT be revoked — this is a concurrent rotation, not malicious reuse
+    expect(sessionRepo.revokeByFamily).not.toHaveBeenCalled();
   });
 });
+

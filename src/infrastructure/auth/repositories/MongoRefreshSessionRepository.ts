@@ -55,20 +55,12 @@ export class MongoRefreshSessionRepository implements RefreshSessionRepository {
     return doc ? toDomain(doc) : null;
   }
 
-  async findByTokenHashAndRevoke(tokenHash: string): Promise<RefreshSession | null> {
-    // Atomically mark the session revoked and return the pre-update document.
-    // The pre-update revoked value lets the caller detect whether a concurrent
-    // request already won the race for this token.
-    const doc = await RefreshSessionModel.findOneAndUpdate(
-      { tokenHash },
-      { $set: { revoked: true } },
-      { new: false }, // return document as it was BEFORE the update
+  async revokeById(id: string): Promise<boolean> {
+    const result = await RefreshSessionModel.findOneAndUpdate(
+      { _id: id, revoked: false },
+      { revoked: true },
     );
-    return doc ? toDomain(doc) : null;
-  }
-
-  async revokeById(id: string): Promise<void> {
-    await RefreshSessionModel.findByIdAndUpdate(id, { revoked: true });
+    return result !== null;
   }
 
   async revokeByFamily(tokenFamily: string): Promise<void> {

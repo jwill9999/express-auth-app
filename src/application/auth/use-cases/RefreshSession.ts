@@ -31,9 +31,7 @@ export class RefreshSessionUseCase {
     }
 
     const tokenHash = this.refreshTokenProvider.hashToken(input.refreshToken);
-    // Atomically find and revoke the session to prevent concurrent requests from
-    // both succeeding with the same refresh token.
-    const session = await this.sessionRepo.findByTokenHashAndRevoke(tokenHash);
+    const session = await this.sessionRepo.findByTokenHash(tokenHash);
 
     if (!session) {
       // Token was valid JWT but not in DB — possible reuse of a rotated token
@@ -43,9 +41,7 @@ export class RefreshSessionUseCase {
     }
 
     if (session.revoked) {
-      // Session was already revoked before our atomic update — either a concurrent
-      // request just beat us, or an attacker is replaying an old token.
-      // Revoke entire family as a precaution.
+      // Revoked token presented — reuse detected, revoke entire family
       await this.sessionRepo.revokeByFamily(session.tokenFamily);
       throw new TokenReuseDetectedError();
     }
@@ -59,7 +55,14 @@ export class RefreshSessionUseCase {
       throw new SessionNotFoundError();
     }
 
-    // Session is atomically revoked above — issue new tokens in the same family
+    // Atomically revoke the old session — returns false if a concurrent request
+    // already rotated this token (not malicious reuse, so do NOT revoke the family)
+    const revoked = await this.sessionRepo.revokeById(session.id);
+    if (!revoked) {
+      throw new SessionNotFoundError();
+    }
+
+    // Issue new tokens in the same family
     const accessToken = this.tokenProvider.generate(user.id, user.email);
     const newRefreshToken = this.refreshTokenProvider.generateRefreshToken(
       user.id,
