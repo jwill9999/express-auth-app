@@ -22,6 +22,7 @@ export interface AppDependencies {
   logoutAllSessions?: LogoutAllSessions;
   adminRevokeSessions?: AdminRevokeSessions;
   createRefreshSession?: CreateRefreshSession;
+  adminUserIds?: string[];
 }
 
 export function createApp(deps: AppDependencies): Application {
@@ -41,6 +42,7 @@ export function createApp(deps: AppDependencies): Application {
     deps.logoutAllSessions,
     deps.adminRevokeSessions,
     deps.createRefreshSession,
+    deps.adminUserIds,
   );
   const protectedController = new ProtectedController(authMiddleware);
 

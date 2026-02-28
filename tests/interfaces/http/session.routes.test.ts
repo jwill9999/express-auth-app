@@ -74,6 +74,7 @@ describe('Session Lifecycle Routes', () => {
       logoutCurrentSession: mockLogoutCurrent,
       logoutAllSessions: mockLogoutAll,
       adminRevokeSessions: mockAdminRevoke,
+      adminUserIds: ['1'],
     });
   });
 
@@ -199,12 +200,34 @@ describe('Session Lifecycle Routes', () => {
   });
 
   describe('POST /auth/admin/revoke', () => {
-    it('should revoke all sessions for target user', async () => {
-      const res = await request(app).post('/auth/admin/revoke').send({ userId: 'target-user-id' });
+    it('should revoke all sessions for target user when authenticated as admin', async () => {
+      const res = await request(app)
+        .post('/auth/admin/revoke')
+        .set('Authorization', 'Bearer access-token')
+        .send({ userId: 'target-user-id' });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('User sessions revoked');
+    });
+
+    it('should return 401 when no token is provided', async () => {
+      const res = await request(app).post('/auth/admin/revoke').send({ userId: 'target-user-id' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('should return 403 when authenticated user is not an admin', async () => {
+      vi.mocked(mockTokenProvider.verify).mockReturnValueOnce({ id: 'non-admin-id', email: 'other@example.com' });
+
+      const res = await request(app)
+        .post('/auth/admin/revoke')
+        .set('Authorization', 'Bearer access-token')
+        .send({ userId: 'target-user-id' });
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
     });
 
     it('should return 400 on validation error', async () => {
@@ -212,7 +235,10 @@ describe('Session Lifecycle Routes', () => {
         new ValidationError('User ID is required'),
       );
 
-      const res = await request(app).post('/auth/admin/revoke').send({ userId: '' });
+      const res = await request(app)
+        .post('/auth/admin/revoke')
+        .set('Authorization', 'Bearer access-token')
+        .send({ userId: '' });
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);

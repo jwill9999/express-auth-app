@@ -39,6 +39,7 @@ export class AuthController {
     private logoutAllSessions?: LogoutAllSessions,
     private adminRevokeSessions?: AdminRevokeSessions,
     private createRefreshSession?: CreateRefreshSession,
+    private adminUserIds?: string[],
     private cookieOptions?: CookieOptions,
   ) {
     this.router = Router();
@@ -194,6 +195,10 @@ export class AuthController {
      *         description: User sessions revoked
      *       400:
      *         description: Validation error
+     *       401:
+     *         description: Unauthorized – missing or invalid token
+     *       403:
+     *         description: Forbidden – caller is not an admin
      */
     this.router.post('/admin/revoke', this.adminRevoke.bind(this));
 
@@ -353,6 +358,24 @@ export class AuthController {
     try {
       if (!this.adminRevokeSessions) {
         res.status(501).json({ success: false, message: 'Admin revoke not configured' });
+        return;
+      }
+
+      const authHeader = req.headers.authorization;
+      const accessToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+      if (!accessToken) {
+        res.status(401).json({ success: false, message: 'No token provided' });
+        return;
+      }
+
+      const decoded = this.tokenProvider.verify(accessToken);
+      if (!decoded) {
+        res.status(401).json({ success: false, message: 'Invalid or expired token' });
+        return;
+      }
+
+      if (!this.adminUserIds?.includes(decoded.id)) {
+        res.status(403).json({ success: false, message: 'Forbidden: admin access required' });
         return;
       }
 

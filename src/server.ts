@@ -91,6 +91,7 @@ const authController = new AuthController(
   logoutAllSessions,
   adminRevokeSessions,
   createRefreshSession,
+  config.adminUserIds,
 );
 const protectedController = new ProtectedController(authMiddleware);
 
