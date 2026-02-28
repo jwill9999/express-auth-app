@@ -56,9 +56,7 @@ describe('RefreshSession Use Case', () => {
 
     refreshTokenProvider = {
       generateRefreshToken: vi.fn().mockReturnValue('new-refresh-token'),
-      verifyRefreshToken: vi
-        .fn()
-        .mockReturnValue({ userId: 'user-1', sid: '', family: 'family-1' }),
+      verifyRefreshToken: vi.fn().mockReturnValue({ userId: 'user-1', family: 'family-1' }),
       hashToken: vi.fn().mockReturnValue('hash-of-old-token'),
     };
 

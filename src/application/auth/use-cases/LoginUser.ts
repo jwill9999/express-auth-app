@@ -42,7 +42,7 @@ export class LoginUser {
     let refreshToken: string | undefined;
     if (this.sessionRepo && this.refreshTokenProvider && this.refreshTokenTtlMs) {
       const tokenFamily = crypto.randomUUID();
-      refreshToken = this.refreshTokenProvider.generateRefreshToken(user.id, '', tokenFamily);
+      refreshToken = this.refreshTokenProvider.generateRefreshToken(user.id, tokenFamily);
       const tokenHash = this.refreshTokenProvider.hashToken(refreshToken);
       const session = new RefreshSession(
         '',

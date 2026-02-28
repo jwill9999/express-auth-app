@@ -8,22 +8,19 @@ export class JwtRefreshTokenProvider implements RefreshTokenProvider {
     private readonly expiresIn: string = '7d',
   ) {}
 
-  generateRefreshToken(userId: string, sessionId: string, tokenFamily: string): string {
-    return jwt.sign(
-      { userId, sid: sessionId, family: tokenFamily, jti: crypto.randomUUID() },
-      this.secret,
-      { expiresIn: this.expiresIn } as jwt.SignOptions,
-    );
+  generateRefreshToken(userId: string, tokenFamily: string): string {
+    return jwt.sign({ userId, family: tokenFamily, jti: crypto.randomUUID() }, this.secret, {
+      expiresIn: this.expiresIn,
+    } as jwt.SignOptions);
   }
 
-  verifyRefreshToken(token: string): { userId: string; sid: string; family: string } | null {
+  verifyRefreshToken(token: string): { userId: string; family: string } | null {
     try {
       const decoded = jwt.verify(token, this.secret) as {
         userId: string;
-        sid: string;
         family: string;
       };
-      return { userId: decoded.userId, sid: decoded.sid, family: decoded.family };
+      return { userId: decoded.userId, family: decoded.family };
     } catch {
       return null;
     }

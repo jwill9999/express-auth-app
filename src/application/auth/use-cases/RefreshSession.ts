@@ -62,7 +62,6 @@ export class RefreshSessionUseCase {
     const accessToken = this.tokenProvider.generate(user.id, user.email);
     const newRefreshToken = this.refreshTokenProvider.generateRefreshToken(
       user.id,
-      '',
       session.tokenFamily,
     );
     const newTokenHash = this.refreshTokenProvider.hashToken(newRefreshToken);
