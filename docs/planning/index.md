@@ -395,7 +395,7 @@ Added full refresh token lifecycle with rotating tokens, reuse detection, and re
 - ✅ Short-lived access tokens (5m default)
 - ✅ Secure httpOnly cookie transport for refresh tokens
 - ✅ Google OAuth shares same lifecycle as email/password login
-- ✅ 45 new tests (86 total, all passing)
+- ✅ ~51 new tests (88 total, all passing)
 - ✅ Zero architecture boundary violations
 
 **Related Docs:**
