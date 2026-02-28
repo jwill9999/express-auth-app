@@ -4,7 +4,8 @@
 
 .PHONY: help install dev start build test test-watch test-coverage \
         lint lint-fix lint-deps format format-check typecheck validate \
-        docker-up docker-down docker-logs docker-prod-up docker-prod-down docker-prod-logs \
+        docker-build docker-rebuild docker-up docker-down docker-logs \
+        docker-prod-build docker-prod-rebuild docker-prod-up docker-prod-down docker-prod-logs \
         clean
 
 # ── Default ──────────────────────────────────
@@ -63,7 +64,13 @@ validate: ## Run all checks (typecheck + lint + boundaries + format)
 
 # ── Docker (Development) ─────────────────────
 
-docker-up: ## Start dev containers
+docker-build: ## Build (or rebuild) dev Docker image
+	docker compose build
+
+docker-rebuild: ## Rebuild dev image and restart containers
+	docker compose up -d --build
+
+docker-up: ## Start dev containers (existing image)
 	docker compose up -d
 
 docker-down: ## Stop dev containers
@@ -74,7 +81,13 @@ docker-logs: ## Tail dev container logs
 
 # ── Docker (Production) ─────────────────────
 
-docker-prod-up: ## Start production containers
+docker-prod-build: ## Build (or rebuild) production Docker image
+	docker compose -f docker-compose.prod.yml build
+
+docker-prod-rebuild: ## Rebuild production image and restart containers
+	docker compose -f docker-compose.prod.yml up -d --build
+
+docker-prod-up: ## Start production containers (existing image)
 	docker compose -f docker-compose.prod.yml up -d
 
 docker-prod-down: ## Stop production containers
