@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Documentation Index
 
 Welcome to the Express Auth API documentation. This directory contains comprehensive documentation for the project.

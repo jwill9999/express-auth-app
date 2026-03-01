@@ -3,3 +3,8 @@ description: Clean Architecture Express.js authentication API — documentation
 theme: minima
 baseurl: "/express-auth-app"
 url: "https://letuscode.co.uk"
+
+header_pages: []
+
+author:
+  name: Development Team
