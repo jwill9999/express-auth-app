@@ -18,6 +18,11 @@ Run these phases in order, looping until clean:
 
 Exit when: the Reviewer finds zero new issues AND `npm run validate && npm run test` exits 0.
 
+**Minimum loop policy:** Always run at least one full confirmatory pass after the last fix loop.
+Never terminate immediately after a loop that fixed issues — always re-enter Phase 1 to
+confirm the fixes introduced nothing new. Only terminate on a loop where the Reviewer
+finds zero new issues from the start.
+
 ## Model & Tooling Assignments
 
 Each phase uses the best model for the job. Models are set explicitly via the `model`
