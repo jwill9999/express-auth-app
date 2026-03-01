@@ -27,7 +27,7 @@ The API uses a **dual-token system** with short-lived access tokens and rotating
 | **Storage (client)** | In-memory (JS variable) | Browser cookie jar (not accessible to JS) |
 | **Storage (server)** | Stateless (not stored) | SHA-256 hash stored in MongoDB |
 | **Revocable** | No (short-lived, expires naturally) | Yes (revoked in database) |
-| **JWT claims** | `{ id, email, iat, exp }` | `{ userId, sid, family, jti, iat, exp }` |
+| **JWT claims** | `{ id, email, iat, exp }` | `{ userId, family, jti, iat, exp }` |
 
 ## Authentication Flows
 
