@@ -188,6 +188,12 @@ api.interceptors.response.use(
 - [ ] Logout all devices → other tabs fail on next refresh → redirected to login
 - [ ] Simulate token theft (replay old refresh token) → reuse detected → forced re-login
 
+**Documentation:**
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Create/update `docs/guides/setup.md` — frontend integration guide (token storage, interceptor pattern, cookie requirements)
+
 ---
 
 ### Email Verification
@@ -218,8 +224,13 @@ Add email verification to ensure valid email addresses and prevent fake accounts
 - [ ] Send styled HTML emails
 - [ ] Block unverified users from protected routes
 - [ ] Add email templates
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — document `/auth/verify-email` and `/auth/resend-verification`
+- [ ] Update `docs/api/authentication.md` — document the email verification flow
+- [ ] Update `docs/architecture/database-schema.md` — add `emailVerified`, `emailVerificationToken`, `emailVerificationExpires` fields
 
 **Database Changes:**
 
@@ -287,8 +298,12 @@ Allow users to reset their password via email when they forget it.
 - [ ] Validate reset tokens
 - [ ] Expire tokens after 1 hour
 - [ ] Hash new password
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — document `/auth/forgot-password` and `/auth/reset-password`
+- [ ] Update `docs/api/authentication.md` — document the password reset flow
 
 ---
 
@@ -317,7 +332,13 @@ Implement API versioning to support multiple API versions simultaneously.
 - [ ] Support Accept-Version header
 - [ ] Update documentation
 - [ ] Add deprecation mechanism
-- [ ] Update frontend integration docs
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — prefix all routes with `/v1`
+- [ ] Update `docs/api/authentication.md` — note versioning strategy
+- [ ] Update `docs/guides/development.md` — document how to add new API versions
+- [ ] Update frontend integration docs to use `/v1` prefix
 
 ---
 
@@ -349,8 +370,14 @@ Create admin-only endpoints for user management and system monitoring.
 - [ ] DELETE /admin/users/:id (delete user)
 - [ ] GET /admin/stats (system statistics)
 - [ ] Add admin seed script
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — document all `/admin/*` endpoints
+- [ ] Update `docs/architecture/overview.md` — document role-based access control
+- [ ] Update `docs/architecture/database-schema.md` — add `roles` field to User schema
+- [ ] Create `docs/guides/setup.md` section — document admin seed script usage
 
 ---
 
@@ -382,8 +409,13 @@ Add optional two-factor authentication using TOTP (Google Authenticator, Authy).
 - [ ] Generate and display QR codes
 - [ ] Generate backup codes
 - [ ] Modify login flow for 2FA
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — document `/auth/2fa/enable` and `/auth/2fa/verify`
+- [ ] Update `docs/api/authentication.md` — document the 2FA login flow
+- [ ] Update `docs/architecture/database-schema.md` — add 2FA fields to User schema
 
 ---
 
@@ -410,8 +442,13 @@ Add additional OAuth providers beyond Google.
 - [ ] Create OAuth routes for each provider
 - [ ] Update User model for multiple providers
 - [ ] Allow linking accounts
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/authentication.md` — document GitHub and Microsoft OAuth flows
+- [ ] Update `docs/architecture/database-schema.md` — document multi-provider User schema changes
+- [ ] Update `docs/guides/setup.md` — add GitHub and Microsoft OAuth app configuration steps
 
 ---
 
@@ -441,8 +478,12 @@ Add Redis for caching and session storage to improve performance.
 - [ ] Store sessions in Redis
 - [ ] Implement cache invalidation
 - [ ] Add cache middleware
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/architecture/overview.md` — document Redis in the infrastructure layer
+- [ ] Create/update `docs/guides/deployment.md` — Redis setup, Docker Compose config, and graceful degradation notes
 
 ---
 
@@ -540,8 +581,12 @@ Allow external systems to subscribe to events (user registered, login, etc.).
 - [ ] Implement retry queue
 - [ ] Add webhook logs
 - [ ] Create webhook testing tool
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Update `docs/api/endpoints.md` — document all `/webhooks/*` endpoints
+- [ ] Update `docs/architecture/overview.md` — document event emitter pattern
 
 ---
 
@@ -571,8 +616,12 @@ Add GraphQL API alongside REST API for more flexible data fetching.
 - [ ] Add authentication middleware
 - [ ] Set up GraphQL Playground
 - [ ] Implement subscriptions (optional)
-- [ ] Update documentation
 - [ ] Add tests
+- [ ] Update `docs/planning/index.md` with completed feature entry
+- [ ] Update `docs/planning/backlog.md` (mark done)
+- [ ] Add entry to `docs/changelog/YYYY-MM.md`
+- [ ] Create `docs/api/graphql.md` — schema reference and example queries
+- [ ] Update `docs/architecture/overview.md` — document GraphQL alongside REST
 
 ---
 
