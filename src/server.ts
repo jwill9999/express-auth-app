@@ -32,6 +32,7 @@ import { AuthController } from './interfaces/http/controllers/AuthController.js'
 import { ProtectedController } from './interfaces/http/controllers/ProtectedController.js';
 import { createAuthMiddleware } from './interfaces/http/middleware/AuthMiddleware.js';
 import { createRoutes } from './interfaces/http/routes.js';
+import { authRateLimiter, protectedRateLimiter } from './interfaces/http/middleware/rateLimiter.js';
 import { swaggerSpec } from './interfaces/http/swagger.js';
 import logger from './interfaces/http/middleware/logger.js';
 
@@ -144,7 +145,12 @@ app.use(
 );
 
 // Routes
-app.use(createRoutes(authController, protectedController));
+app.use(
+  createRoutes(authController, protectedController, {
+    authLimiter: config.rateLimitEnabled ? authRateLimiter : undefined,
+    protectedLimiter: config.rateLimitEnabled ? protectedRateLimiter : undefined,
+  }),
+);
 
 /**
  * @swagger

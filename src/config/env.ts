@@ -44,4 +44,5 @@ export const config = {
     .split(',')
     .map((id) => id.trim())
     .filter(Boolean),
+  rateLimitEnabled: process.env.RATE_LIMIT_ENABLED !== 'false',
 };
