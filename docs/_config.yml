@@ -8,6 +8,10 @@ header_pages: []
 
 author: Jason Williams
 
+exclude:
+  - planning/
+  - changelog/
+
 defaults:
   - scope:
       path: ""

@@ -13,15 +13,6 @@ System design, database schemas, and technical architecture decisions.
 - [Authentication Flow](./architecture/authentication.md) - JWT and OAuth implementation
 - [API Design](./architecture/api-design.md) - RESTful API design principles
 
-### [Planning](./planning/)
-
-Project tracking, completed features, and future roadmap.
-
-- [Completed Features](./planning/completed-features.md) - Completed features and timeline
-- [Backlog](./planning/backlog.md) - Planned features and improvements
-- [Roadmap](./planning/roadmap.md) - Long-term vision and milestones
-- [Feature Plans](./planning/features/) - Detailed implementation plans for features
-
 ### [API Reference](./api/)
 
 Complete API endpoint documentation with examples.
@@ -39,29 +30,19 @@ Step-by-step guides for common tasks.
 - [Deployment](./guides/deployment.md) - Production deployment
 - [Troubleshooting](./guides/troubleshooting.md) - Common issues and solutions
 
-### [Changelog](./changelog/)
-
-Historical record of changes and updates.
-
-- [2026-02](./changelog/2026-02.md) - February 2026 changes
-- [2026-03](./changelog/2026-03.md) - March 2026 changes
-
 ## 🚀 Quick Links
 
 - **📖 Live Docs Site**: [https://letuscode.co.uk/express-auth-app/](https://letuscode.co.uk/express-auth-app/)
 - **Getting Started**: [Setup Guide](./guides/setup.md)
 - **API Documentation**: [Swagger UI](http://localhost:3000/api-docs) (when running)
 - **Architecture Overview**: [System Design](./architecture/overview.md)
-- **Current Work**: [Backlog](./planning/backlog.md)
 
 ## 📝 Contributing to Documentation
 
 When making changes to the project:
 
 1. Update relevant documentation in the appropriate section
-2. Add entry to [planning/completed-features.md](./planning/completed-features.md)
-3. Update backlog if completing planned features
-4. Add changelog entry for significant changes
+2. Add changelog entry for significant changes
 
 See [Documentation Instructions](../.github/instructions/docs.instructions.md) for detailed guidelines.
 
