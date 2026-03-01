@@ -2,7 +2,7 @@
 
 Features, improvements, and tasks planned for future development.
 
-**Total Items:** 15 | **High:** 3 | **Medium:** 3 | **Low:** 4 | **Tech Debt:** 4
+**Total Items:** 17 | **High:** 3 | **Medium:** 5 | **Low:** 4 | **Tech Debt:** 4
 
 ---
 
@@ -18,6 +18,8 @@ Features, improvements, and tasks planned for future development.
 | 5   | Password Reset Flow              | 🟡 Medium | Medium | 10-14h    | 📋 Planned | [↓](#password-reset-flow)           |
 | 6   | API Versioning                   | 🟡 Medium | Small  | 4-6h      | 📋 Planned | [↓](#api-versioning)                |
 | 7   | Admin Dashboard Backend          | 🟡 Medium | Large  | 24-32h    | 📋 Planned | [↓](#admin-dashboard-backend)       |
+| 10a | Redis Rate Limit Store           | 🟡 Medium | Small  | 2-4h      | 📋 Planned | [↓](#redis-rate-limit-store)        |
+| 10b | Nginx Reverse Proxy Rate Limiting | 🟡 Medium | Small  | 2-3h      | 📋 Planned | [↓](#nginx-reverse-proxy-rate-limiting) |
 | 8   | Two-Factor Authentication (2FA)  | 🟢 Low    | Large  | 20-24h    | 📋 Planned | [↓](#two-factor-authentication-2fa) |
 | 9   | Social Login (GitHub, Microsoft) | 🟢 Low    | Medium | 8-12h     | 📋 Planned | [↓](#social-login-github-microsoft) |
 | 10  | Redis Caching Layer              | 🟢 Low    | Medium | 10-14h    | 📋 Planned | [↓](#redis-caching-layer)           |
@@ -444,6 +446,67 @@ Add Redis for caching and session storage to improve performance.
 
 ---
 
+### Redis Rate Limit Store
+
+**Priority:** 🟡 Medium  
+**Effort:** Small  
+**Estimated Time:** 2-4 hours  
+**Dependencies:** Redis Caching Layer (Redis must be running in Docker Compose)
+
+**Description:**  
+The current `express-rate-limit` middleware uses an **in-memory store**, which means each Node.js process maintains its own independent counter. If the app is ever scaled horizontally (multiple instances or pods), a client gets `limit × instances` effective requests — completely defeating the rate limiter. Switching to `rate-limit-redis` gives a single shared counter across all instances.
+
+**Requirements:**
+
+- Install `rate-limit-redis` (or `@upstash/ratelimit` for serverless)
+- Connect rate limiter to the existing Redis instance
+- Graceful degradation: fall back to in-memory if Redis is unavailable
+- No change to the existing limits or API behaviour
+
+**Acceptance Criteria:**
+
+- [ ] Install `rate-limit-redis`
+- [ ] Create a shared Redis client (reuse from Redis Caching Layer)
+- [ ] Pass Redis store to `authRateLimiter` and `protectedRateLimiter`
+- [ ] Verify counters are shared across two parallel app instances
+- [ ] Graceful degradation when Redis is down (log warning, don't crash)
+- [ ] Update tests (mock Redis store)
+- [ ] Update documentation
+
+**Notes:**
+Must be implemented before deploying more than one Node instance in production. Safe to skip until horizontal scaling is needed.
+
+---
+
+### Nginx Reverse Proxy Rate Limiting
+
+**Priority:** 🟡 Medium  
+**Effort:** Small  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Redis Rate Limit Store (app-level limiter should be hardened first)
+
+**Description:**  
+Move coarse-grained rate limiting to the Nginx reverse proxy layer so that excess traffic is rejected **before** it reaches Node.js. This reduces CPU/memory load on the app for abusive clients. The `express-rate-limit` middleware is kept as a defence-in-depth backstop (e.g. if someone hits the app directly by IP).
+
+**Requirements:**
+
+- Nginx `limit_req_zone` and `limit_req` directives for `/auth/` and `/api/` locations
+- Return `429` with a JSON body consistent with the app's error format
+- App-level rate limiter remains active but limits are relaxed (higher threshold) since Nginx handles the primary enforcement
+- Nginx config added to Docker Compose production setup
+
+**Acceptance Criteria:**
+
+- [ ] Add `limit_req_zone` zones in `nginx.conf` (auth: 5r/m, api: 100r/m per IP)
+- [ ] Apply `limit_req` to `/auth/` and `/api/` location blocks
+- [ ] Configure `limit_req_status 429` and a custom JSON error page
+- [ ] Relax app-level limits to act as backstop only (e.g. 2× Nginx limit)
+- [ ] Test that Nginx blocks before Node handles the request (check access logs)
+- [ ] Update `docs/guides/deployment.md` with Nginx rate limiting notes
+- [ ] Update `docker-compose.prod.yml` with Nginx service config
+
+---
+
 ### Webhook System
 
 **Priority:** 🟢 Low  
@@ -569,6 +632,6 @@ Add GraphQL API alongside REST API for more flexible data fetching.
 
 ---
 
-**Last Updated:** 2026-02-28  
-**Total Items:** 15 prioritized + 4 technical debt + ideas  
+**Last Updated:** 2026-03-01  
+**Total Items:** 17 prioritized + 4 technical debt + ideas  
 **Next Review:** 2026-03-31
