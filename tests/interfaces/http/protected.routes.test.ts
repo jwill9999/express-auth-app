@@ -23,6 +23,7 @@ describe('Protected Routes', () => {
       registerUser: mockRegisterUser,
       loginUser: mockLoginUser,
       tokenProvider: mockTokenProvider,
+      rateLimiting: false,
     });
   });
 

@@ -2,7 +2,7 @@
 
 This document tracks all features, changes, and additions to the project with timestamps.
 
-**Total Completed:** 11 features | **Current Version:** 1.1.2
+**Total Completed:** 12 features | **Current Version:** 1.1.3
 
 ---
 
@@ -21,8 +21,27 @@ This document tracks all features, changes, and additions to the project with ti
 | 9   | JWT Lifecycle Hardening         | 2026-02-21 | 🔴 High   | ✅ Complete | Secure token lifecycle  | [↓](#jwt-lifecycle-hardening---2026-02-21)         |
 | 10  | Session Lifecycle Fixes         | 2026-02-21 | 🔴 High   | ✅ Complete | Architecture + security | [↓](#session-lifecycle-fixes---2026-02-21)         |
 | 11  | PR Code Review Fixes            | 2026-02-28 | 🔴 High   | ✅ Complete | Race condition + DX     | [↓](#pr-code-review-fixes---2026-02-28)            |
+| 12  | Rate Limiting Middleware        | 2026-03-01 | 🔴 High   | ✅ Complete | Brute force protection  | [↓](#rate-limiting-middleware---2026-03-01)        |
 
 > **Note:** When completed features exceed 15 items, individual features will be moved to separate files in `completed/` directory.
+
+---
+
+## 2026-03
+
+### Rate Limiting Middleware - 2026-03-01
+
+**Status:** ✅ Completed
+**Author:** Development Team
+**Description:** Implemented `express-rate-limit` middleware to protect against brute force and API abuse. Auth endpoints are limited to 5 requests per 15 minutes; protected API endpoints to 100 per 15 minutes. Rate limiting is disabled in test environments via the `rateLimiting` flag on `AppDependencies`.
+**Files Changed:**
+- `src/interfaces/http/middleware/rateLimiter.ts` (new)
+- `src/interfaces/http/routes.ts` — apply limiters per route group
+- `src/interfaces/http/app.ts` — `rateLimiting` flag in `AppDependencies`
+- `src/interfaces/http/swagger.ts` — `RateLimitError` schema + 429 responses
+- `src/interfaces/http/controllers/AuthController.ts` — 429 Swagger docs on register/login
+- `tests/interfaces/http/rateLimiter.test.ts` (new)
+**Related Docs:** [backlog.md](backlog.md#rate-limiting-middleware)
 
 ---
 

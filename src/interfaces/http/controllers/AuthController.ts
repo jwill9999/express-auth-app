@@ -99,6 +99,12 @@ export class AuthController {
      *               $ref: '#/components/schemas/AuthResponse'
      *       400:
      *         description: Validation error or user already exists
+     *       429:
+     *         description: Too many requests (5 per 15 minutes)
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/RateLimitError'
      *       500:
      *         description: Server error
      */
@@ -125,6 +131,12 @@ export class AuthController {
      *               $ref: '#/components/schemas/AuthResponse'
      *       401:
      *         description: Invalid credentials
+     *       429:
+     *         description: Too many requests (5 per 15 minutes)
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/RateLimitError'
      *       500:
      *         description: Server error
      */

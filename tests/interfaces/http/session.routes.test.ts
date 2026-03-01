@@ -75,6 +75,7 @@ describe('Session Lifecycle Routes', () => {
       logoutAllSessions: mockLogoutAll,
       adminRevokeSessions: mockAdminRevoke,
       adminUserIds: ['1'],
+      rateLimiting: false,
     });
   });
 

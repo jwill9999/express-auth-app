@@ -10,7 +10,7 @@ Features, improvements, and tasks planned for future development.
 
 | #   | Feature                          | Priority  | Effort | Est. Time | Status     | Details                             |
 | --- | -------------------------------- | --------- | ------ | --------- | ---------- | ----------------------------------- |
-| 1   | Rate Limiting Middleware         | 🔴 High   | Small  | 2-4h      | 📋 Planned | [↓](#rate-limiting-middleware)      |
+| 1   | ~~Rate Limiting Middleware~~     | ~~🔴 High~~   | ~~Small~~  | ~~2-4h~~      | ✅ Done    | [↓](#rate-limiting-middleware)      |
 | 2   | ~~Refresh Token Implementation~~ | ~~🔴 High~~ | ~~Medium~~ | ~~8-12h~~ | ✅ Done | [↓](#refresh-token-implementation)  |
 | 2a  | Frontend Auth Integration        | 🔴 High   | Medium | 6-10h     | 📋 Planned | [↓](#frontend-auth-integration)     |
 | 3   | Email Verification               | 🔴 High   | Large  | 16-20h    | 📋 Planned | [↓](#email-verification)            |
@@ -41,32 +41,21 @@ Features, improvements, and tasks planned for future development.
 
 ### Rate Limiting Middleware
 
-**Priority:** 🔴 High  
-**Effort:** Small  
-**Estimated Time:** 2-4 hours
+**Priority:** 🔴 High — ✅ **Completed 2026-03-01**
+**Effort:** Small
 
-**Description:**  
-Implement rate limiting to prevent API abuse and protect against brute force attacks.
-
-**Requirements:**
-
-- Use `express-rate-limit` package
-- Different limits for different endpoint types:
-  - Auth endpoints: 5 requests per 15 minutes
-  - Protected endpoints: 100 requests per 15 minutes
-  - Health check: Unlimited
-- Return `429 Too Many Requests` with `Retry-After` header
-- Log rate limit violations
+**Description:**
+Implemented `express-rate-limit` middleware protecting auth endpoints (5 req/15 min) and protected API endpoints (100 req/15 min). Returns `429 Too Many Requests` with `RateLimit-*` standard headers. Rate limiting is opt-out via `rateLimiting: false` in `AppDependencies` (used in tests).
 
 **Acceptance Criteria:**
 
-- [ ] Install and configure express-rate-limit
-- [ ] Apply rate limiting to auth routes
-- [ ] Apply rate limiting to protected routes
-- [ ] Return proper 429 status codes
-- [ ] Add rate limit info to response headers
-- [ ] Document rate limits in API docs
-- [ ] Add tests for rate limiting
+- [x] Install and configure express-rate-limit
+- [x] Apply rate limiting to auth routes
+- [x] Apply rate limiting to protected routes
+- [x] Return proper 429 status codes
+- [x] Add rate limit info to response headers (`RateLimit-*`)
+- [x] Document rate limits in API docs (Swagger 429 responses + `RateLimitError` schema)
+- [x] Add tests for rate limiting
 
 **Related:**
 

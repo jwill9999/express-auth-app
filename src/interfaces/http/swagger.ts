@@ -68,6 +68,16 @@ const options: swaggerJsdoc.Options = {
             error: { type: 'string', description: 'Detailed error (development only)' },
           },
         },
+        RateLimitError: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: false },
+            message: {
+              type: 'string',
+              example: 'Too many requests, please try again after 15 minutes.',
+            },
+          },
+        },
         ProtectedDataResponse: {
           type: 'object',
           properties: {

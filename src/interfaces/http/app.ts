@@ -13,6 +13,7 @@ import { AuthController } from './controllers/AuthController.js';
 import { ProtectedController } from './controllers/ProtectedController.js';
 import { createAuthMiddleware } from './middleware/AuthMiddleware.js';
 import { createRoutes } from './routes.js';
+import { authRateLimiter, protectedRateLimiter } from './middleware/rateLimiter.js';
 
 export interface AppDependencies {
   registerUser: RegisterUser;
@@ -24,6 +25,7 @@ export interface AppDependencies {
   adminRevokeSessions?: AdminRevokeSessions;
   googleOAuthLogin?: GoogleOAuthLogin;
   adminUserIds?: string[];
+  rateLimiting?: boolean;
 }
 
 export function createApp(deps: AppDependencies): Application {
@@ -48,7 +50,13 @@ export function createApp(deps: AppDependencies): Application {
   );
   const protectedController = new ProtectedController(authMiddleware);
 
-  app.use(createRoutes(authController, protectedController));
+  const enableRateLimiting = deps.rateLimiting ?? true;
+  app.use(
+    createRoutes(authController, protectedController, {
+      authLimiter: enableRateLimiting ? authRateLimiter : undefined,
+      protectedLimiter: enableRateLimiting ? protectedRateLimiter : undefined,
+    }),
+  );
 
   // Error handling middleware
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

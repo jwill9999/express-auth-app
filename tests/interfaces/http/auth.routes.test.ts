@@ -42,6 +42,7 @@ describe('Auth Routes', () => {
       registerUser: mockRegisterUser,
       loginUser: mockLoginUser,
       tokenProvider: mockTokenProvider,
+      rateLimiting: false,
     });
   });
 

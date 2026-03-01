@@ -47,6 +47,7 @@ describe('Google OAuth Routes', () => {
       loginUser: mockLoginUser,
       tokenProvider: mockTokenProvider,
       googleOAuthLogin: mockGoogleOAuthLogin,
+      rateLimiting: false,
     });
   });
 
@@ -85,6 +86,7 @@ describe('Google OAuth Routes', () => {
         registerUser: mockRegisterUser,
         loginUser: mockLoginUser,
         tokenProvider: mockTokenProvider,
+        rateLimiting: false,
       });
 
       const res = await request(appWithoutOAuth).get('/auth/google/callback');
