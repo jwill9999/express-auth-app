@@ -34,5 +34,8 @@ export const config = {
     callbackUrl: process.env.GOOGLE_CALLBACK_URL || '',
   },
   nodeEnv: env,
-  adminUserIds: (process.env.ADMIN_USER_IDS || '').split(',').filter(Boolean),
+  adminUserIds: (process.env.ADMIN_USER_IDS || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean),
 };
