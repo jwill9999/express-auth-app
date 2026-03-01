@@ -44,6 +44,7 @@ Step-by-step guides for common tasks.
 Historical record of changes and updates.
 
 - [2026-02](./changelog/2026-02.md) - February 2026 changes
+- [2026-03](./changelog/2026-03.md) - March 2026 changes
 
 ## 🚀 Quick Links
 
@@ -65,5 +66,5 @@ See [Documentation Instructions](../.github/instructions/docs.instructions.md) f
 
 ---
 
-**Last Updated:** 2026-02-21  
-**Project Version:** 1.0.0
+**Last Updated:** 2026-03-01  
+**Project Version:** 1.1.3

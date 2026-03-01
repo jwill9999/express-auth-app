@@ -70,6 +70,7 @@ All dependencies point inward. Inner layers never import from outer layers. Boun
 - **Passport.js** - Authentication middleware
 - **Passport-Google-OAuth20** - Google OAuth 2.0 strategy
 - **bcryptjs** - Password hashing
+- **express-rate-limit** - Rate limiting middleware (auth: 5 req/15 min, API: 100 req/15 min)
 
 ### Development & Build
 - **TypeScript** - Type safety and tooling
@@ -153,17 +154,18 @@ See [Authentication Architecture](./authentication.md) for full details.
 1. Request received by Express
 2. Morgan logs request
 3. CORS middleware checks origin
-4. Body parser processes request body
-5. Session middleware (for OAuth only)
-6. Route handler processes request
-7. Auth middleware verifies JWT (protected routes)
-8. Response sent to client
-9. Morgan logs response
+4. Rate limiter checks request count (auth: 5/15 min, API: 100/15 min) → 429 if exceeded
+5. Body parser processes request body
+6. Session middleware (for OAuth only)
+7. Route handler processes request
+8. Auth middleware verifies JWT (protected routes)
+9. Response sent to client
+10. Morgan logs response
 
 ## Data Flow
 
 ```
-Request → CORS → Logger → Parser → Session → Passport → Routes → Auth Middleware → Business Logic → Database → Response
+Request → CORS → Logger → Rate Limiter → Parser → Session → Passport → Routes → Auth Middleware → Business Logic → Database → Response
 ```
 
 ## Environment Configuration
@@ -172,6 +174,14 @@ The application supports multiple environments:
 - **Development**: `.env.development` (hot reload, detailed logging)
 - **Production**: `.env.production` (optimized, minimal logging)
 - **Local**: `.env.local` (optional overrides, gitignored)
+
+### Key Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `RATE_LIMIT_ENABLED` | `true` | Set to `false` to disable rate limiting (e.g. local dev) |
+| `JWT_EXPIRES_IN` | `5m` | Access token lifetime |
+| `REFRESH_TOKEN_EXPIRES_IN` | `7d` | Refresh token lifetime |
 
 ## Deployment Architecture
 
@@ -221,7 +231,14 @@ The application supports multiple environments:
    - Credentials support for same-origin
    - Preflight handling
 
-5. **Input Validation**
+5. **Rate Limiting**
+   - Auth endpoints (`/auth/*`): 5 requests per 15 minutes per IP
+   - Protected API endpoints (`/api/*`): 100 requests per 15 minutes per IP
+   - Returns `429 Too Many Requests` with `RateLimit-*` standard headers
+   - Configurable via `RATE_LIMIT_ENABLED` env var
+   - Defence-in-depth: app-level backstop; move primary enforcement to Nginx/proxy at scale (see [Backlog](../planning/backlog.md#nginx-reverse-proxy-rate-limiting))
+
+6. **Input Validation**
    - Email format validation
    - Password strength requirements
    - Request body validation
@@ -236,14 +253,14 @@ The application supports multiple environments:
 ## Future Architecture Considerations
 
 See [Roadmap](../planning/roadmap.md) and [Backlog](../planning/backlog.md) for planned improvements:
-- Rate limiting
 - Email verification
 - Two-factor authentication
 - Admin dashboard
 - Metrics and monitoring
-- Redis for caching
+- Redis for caching (+ Redis-backed rate limit store for horizontal scaling)
+- Nginx reverse proxy rate limiting
 
 ---
 
-**Last Updated:** 2026-02-21  
+**Last Updated:** 2026-03-01  
 **Author:** Development Team
