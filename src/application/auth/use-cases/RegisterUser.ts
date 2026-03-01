@@ -24,6 +24,10 @@ export class RegisterUser {
       throw new ValidationError('Invalid email format');
     }
 
+    if (input.password.length < 8) {
+      throw new ValidationError('Password must be at least 8 characters');
+    }
+
     const hasUppercase = /[A-Z]/.test(input.password);
     const hasLowercase = /[a-z]/.test(input.password);
     const hasNumber = /\d/.test(input.password);

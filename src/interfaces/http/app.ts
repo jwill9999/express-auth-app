@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction, Application } from 'express';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
 import type { RegisterUser } from '../../application/auth/use-cases/RegisterUser.js';
 import type { LoginUser } from '../../application/auth/use-cases/LoginUser.js';
 import type { RefreshSessionUseCase } from '../../application/auth/use-cases/RefreshSession.js';
@@ -31,6 +32,7 @@ export function createApp(deps: AppDependencies): Application {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
+  app.use(passport.initialize());
 
   const authMiddleware = createAuthMiddleware(deps.tokenProvider);
   const authController = new AuthController(

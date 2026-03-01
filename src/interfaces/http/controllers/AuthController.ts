@@ -438,24 +438,28 @@ export class AuthController {
     }
   }
 
-  private async googleCallback(req: Request, res: Response): Promise<void> {
-    if (!this.googleOAuthLogin) {
-      res.status(501).json({ success: false, message: 'Google OAuth not configured' });
-      return;
+  private async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!this.googleOAuthLogin) {
+        res.status(501).json({ success: false, message: 'Google OAuth not configured' });
+        return;
+      }
+
+      const user = req.user as User;
+      const result = await this.googleOAuthLogin.execute(user);
+
+      if (result.refreshToken) {
+        this.setRefreshTokenCookie(res, result.refreshToken);
+      }
+
+      res.json({
+        success: true,
+        message: 'Google login successful',
+        ...result,
+      });
+    } catch (error) {
+      this.handleError(error, res, next);
     }
-
-    const user = req.user as User;
-    const result = await this.googleOAuthLogin.execute(user);
-
-    if (result.refreshToken) {
-      this.setRefreshTokenCookie(res, result.refreshToken);
-    }
-
-    res.json({
-      success: true,
-      message: 'Google login successful',
-      ...result,
-    });
   }
 
   private handleError(error: unknown, res: Response, next: NextFunction): void {

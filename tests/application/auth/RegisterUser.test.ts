@@ -96,6 +96,12 @@ describe('RegisterUser Use Case', () => {
     ).rejects.toThrow(ValidationError);
   });
 
+  it('should throw ValidationError for password shorter than 8 characters', async () => {
+    await expect(
+      registerUser.execute({ email: 'test@example.com', password: 'Aa1!' }),
+    ).rejects.toThrow(ValidationError);
+  });
+
   it('should throw UserAlreadyExistsError when email is taken', async () => {
     vi.mocked(userRepo.findByEmail).mockResolvedValue(
       new User('existing-id', 'test@example.com', 'hash'),

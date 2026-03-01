@@ -39,9 +39,6 @@ import logger from './interfaces/http/middleware/logger.js';
 
 const app: Application = express();
 
-// Connect to database
-connectDB(config.mongoUri);
-
 // Infrastructure instances
 const userRepo = new MongoUserRepository();
 const sessionRepo = new MongoRefreshSessionRepository();
@@ -118,6 +115,11 @@ app.use(
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'strict',
+    },
   }),
 );
 
@@ -174,7 +176,11 @@ app.get('/', (_req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
+  if (config.nodeEnv === 'development') {
+    console.error(err.stack);
+  } else {
+    console.error(err.message);
+  }
   res.status(500).json({
     success: false,
     message: 'Something went wrong!',
@@ -187,7 +193,10 @@ app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
-  console.log(`Visit http://localhost:${config.port} for API info`);
-});
+(async () => {
+  await connectDB(config.mongoUri);
+  app.listen(config.port, () => {
+    console.log(`Server running on port ${config.port}`);
+    console.log(`Visit http://localhost:${config.port} for API info`);
+  });
+})();
