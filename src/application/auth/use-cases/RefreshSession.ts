@@ -13,11 +13,11 @@ import type { RefreshSessionDTO } from '../dtos/RefreshSessionDTO.js';
 
 export class RefreshSessionUseCase {
   constructor(
-    private sessionRepo: RefreshSessionRepository,
-    private refreshTokenProvider: RefreshTokenProvider,
-    private tokenProvider: TokenProvider,
-    private userRepo: UserRepository,
-    private refreshTokenTtlMs: number,
+    private readonly sessionRepo: RefreshSessionRepository,
+    private readonly refreshTokenProvider: RefreshTokenProvider,
+    private readonly tokenProvider: TokenProvider,
+    private readonly userRepo: UserRepository,
+    private readonly refreshTokenTtlMs: number,
   ) {}
 
   async execute(input: RefreshSessionDTO) {

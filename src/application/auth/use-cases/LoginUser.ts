@@ -7,10 +7,10 @@ import type { CreateRefreshSession } from './CreateRefreshSession.js';
 
 export class LoginUser {
   constructor(
-    private userRepo: UserRepository,
-    private passwordHasher: PasswordHasher,
-    private tokenProvider: TokenProvider,
-    private createRefreshSession?: CreateRefreshSession,
+    private readonly userRepo: UserRepository,
+    private readonly passwordHasher: PasswordHasher,
+    private readonly tokenProvider: TokenProvider,
+    private readonly createRefreshSession?: CreateRefreshSession,
   ) {}
 
   async execute(input: LoginDTO) {
