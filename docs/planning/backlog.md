@@ -19,7 +19,7 @@ Features, improvements, and tasks planned for future development.
 | 6   | API Versioning                   | 🟡 Medium | Small  | 4-6h      | 📋 Planned | [↓](#api-versioning)                |
 | 7   | Admin Dashboard Backend          | 🟡 Medium | Large  | 24-32h    | 📋 Planned | [↓](#admin-dashboard-backend)       |
 | 10a | Redis Rate Limit Store           | 🟡 Medium | Small  | 2-4h      | 📋 Planned | [↓](#redis-rate-limit-store)        |
-| 10b | Nginx Reverse Proxy Rate Limiting | 🟡 Medium | Small  | 2-3h      | 📋 Planned | [↓](#nginx-reverse-proxy-rate-limiting) |
+| 10b | ~~Nginx Reverse Proxy Rate Limiting~~ | ~~🟡 Medium~~ | ~~Small~~ | ~~2-3h~~ | ✅ Done (superseded by Traefik) | [↓](#nginx-reverse-proxy-rate-limiting) |
 | 8   | Two-Factor Authentication (2FA)  | 🟢 Low    | Large  | 20-24h    | 📋 Planned | [↓](#two-factor-authentication-2fa) |
 | 9   | Social Login (GitHub, Microsoft) | 🟢 Low    | Medium | 8-12h     | 📋 Planned | [↓](#social-login-github-microsoft) |
 | 10  | Redis Caching Layer              | 🟢 Low    | Medium | 10-14h    | 📋 Planned | [↓](#redis-caching-layer)           |
@@ -32,7 +32,7 @@ Features, improvements, and tasks planned for future development.
 | --- | ----------------------------- | --------- | ------ | ----------------------------------- |
 | 13  | Code Organization Refactoring | 🟢 Low    | Small  | [↓](#code-organization-refactoring) |
 | 14  | Performance Optimization      | 🟢 Low    | Medium | [↓](#performance-optimization)      |
-| 15  | Security Enhancements         | 🟡 Medium | Small  | [↓](#security-enhancements)         |
+| 15  | ~~Security Enhancements~~     | ~~🟡 Medium~~ | ~~Small~~ | ✅ Done (helmet + Traefik + Zod) | [↓](#security-enhancements)         |
 | 16  | Documentation Improvements    | 🟢 Low    | Small  | [↓](#documentation-improvements)    |
 
 > **Note:** When backlog exceeds 20 items, individual tasks will be moved to separate files in `backlog/` directory.
@@ -652,13 +652,14 @@ Add GraphQL API alongside REST API for more flexible data fetching.
 ### Security Enhancements
 
 **Priority:** 🟡 Medium  
-**Effort:** Small
+**Effort:** Small  
+**Status:** ✅ Partially completed 2026-03-02
 
-- [ ] Add helmet.js for security headers
+- [x] Add helmet.js for security headers
 - [ ] Implement CSRF protection
-- [ ] Add input sanitization
+- [x] Add input sanitization (Zod schema validation at HTTP boundary)
 - [ ] Set up security.txt
-- [ ] Implement security headers
+- [x] Implement security headers (helmet + Traefik middleware)
 
 ### Documentation Improvements
 
