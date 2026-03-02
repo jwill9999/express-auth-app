@@ -18,6 +18,8 @@ import {
   SessionRevokedError,
   TokenReuseDetectedError,
 } from '../../../domain/auth/errors.js';
+import { validate } from '../validation/validate.js';
+import { registerSchema, loginSchema, adminRevokeSchema } from '../validation/schemas.js';
 
 export interface CookieOptions {
   httpOnly: boolean;
@@ -108,7 +110,7 @@ export class AuthController {
      *       500:
      *         description: Server error
      */
-    this.router.post('/register', this.register.bind(this));
+    this.router.post('/register', validate(registerSchema), this.register.bind(this));
 
     /**
      * @swagger
@@ -140,7 +142,7 @@ export class AuthController {
      *       500:
      *         description: Server error
      */
-    this.router.post('/login', this.login.bind(this));
+    this.router.post('/login', validate(loginSchema), this.login.bind(this));
 
     /**
      * @swagger
@@ -264,7 +266,7 @@ export class AuthController {
      *       403:
      *         description: Forbidden – caller is not an admin
      */
-    this.router.post('/admin/revoke', this.adminRevoke.bind(this));
+    this.router.post('/admin/revoke', validate(adminRevokeSchema), this.adminRevoke.bind(this));
 
     /**
      * @swagger

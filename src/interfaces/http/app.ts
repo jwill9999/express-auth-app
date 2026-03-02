@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction, Application } from 'express';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import type { RegisterUser } from '../../application/auth/use-cases/RegisterUser.js';
@@ -31,6 +32,7 @@ export interface AppDependencies {
 export function createApp(deps: AppDependencies): Application {
   const app = express();
 
+  app.use(helmet());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
