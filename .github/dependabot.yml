@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # Keep GitHub Actions pinned SHAs up to date
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+
+  # Keep npm dependencies up to date
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+    groups:
+      # Batch all non-breaking TypeScript type updates together
+      typescript-types:
+        patterns:
+          - "@types/*"
+      # Batch all ESLint-related updates together
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@eslint/*"
+          - "typescript-eslint*"
+    labels:
+      - dependencies
