@@ -1,0 +1,33 @@
+# Traefik static configuration — production
+# Used by docker-compose.prod.yml
+# Requires TRAEFIK_ACME_EMAIL env var to be set.
+
+api:
+  dashboard: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: ${TRAEFIK_ACME_EMAIL}
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: auth-network
+
+log:
+  level: WARN

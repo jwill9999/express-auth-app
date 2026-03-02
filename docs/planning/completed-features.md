@@ -494,6 +494,32 @@ Security and correctness fixes identified by automated code review on PR #2.
 
 ---
 
+### Security Hardening & Infrastructure Improvements - 2026-03-02
+
+**Status:** ✅ Completed
+**Description:** Seven focused security and infrastructure improvements covering secrets hygiene, security headers (defense-in-depth via helmet + Traefik), HTTP boundary validation with Zod, real Mongo integration tests, and Docker hardening.
+**Files Changed:**
+- `.gitignore` — allow `*.example` env files
+- `.env.development.example`, `.env.production.example` — safe templates replacing committed env files (`.env.development`, `.env.production` removed from git)
+- `src/interfaces/http/app.ts` — `helmet` added as first middleware
+- `src/interfaces/http/validation/schemas.ts` (new) — Zod schemas for register, login, adminRevoke
+- `src/interfaces/http/validation/validate.ts` (new) — reusable `validate()` middleware factory
+- `src/interfaces/http/controllers/AuthController.ts` — `validate()` applied on register, login, admin/revoke routes
+- `src/interfaces/http/routes.ts` — `GET /health` endpoint added
+- `traefik/traefik.dev.yml` (new) — Traefik dev static config (HTTP, dashboard on :8080)
+- `traefik/traefik.prod.yml` (new) — Traefik prod static config (HTTPS + Let's Encrypt)
+- `docker-compose.yml` — Traefik service added; app uses `expose` + labels; app healthcheck wired
+- `docker-compose.prod.yml` — Traefik service with TLS; `letsencrypt_data` volume; app healthcheck wired
+- `Dockerfile` — `USER node` non-root user; `HEALTHCHECK` instruction; pinning comment
+- `tests/integration/MongoUserRepository.integration.test.ts` (new) — 8 integration tests
+- `tests/integration/MongoRefreshSessionRepository.integration.test.ts` (new) — 6 integration tests
+**Related Docs:**
+- [Changelog: 2026-03](../changelog/2026-03.md)
+- [Guide: Deployment](../guides/deployment.md)
+- [Guide: Setup](../guides/setup.md)
+
+---
+
 ### Unit Test Coverage ≥ 90% - 2026-03-02
 **Status:** ✅ Completed
 **Description:** Increased unit test coverage to a minimum of 90% across every layer of the Clean Architecture stack. Added Codecov integration with a coverage badge in the README.
@@ -530,9 +556,9 @@ Security and correctness fixes identified by automated code review on PR #2.
 
 ## Summary Statistics
 
-**Total Features Completed:** 13
-**Total Files Created:** 50+
-**Total Lines of Code:** ~4,500+
+**Total Features Completed:** 14
+**Total Files Created:** 55+
+**Total Lines of Code:** ~4,800+
 **Test Coverage:** ≥ 90% across all layers (unit + integration), enforced in CI
 **Documentation Coverage:** 98%
 
@@ -540,6 +566,7 @@ Security and correctness fixes identified by automated code review on PR #2.
 
 | Version | Date       | Major Changes                                        |
 | ------- | ---------- | ---------------------------------------------------- |
+| 1.3.0   | 2026-03-02 | Security hardening: helmet, Traefik, Zod validation, Mongo integration tests, Docker non-root + healthcheck |
 | 1.2.0   | 2026-03-02 | ≥90% test coverage, CI/CD hardening, branch protection, security scanning |
 | 1.1.3   | 2026-03-01 | Rate limiting, GitHub Pages docs site                |
 | 1.0.0   | 2026-02-15 | TypeScript migration, Docker setup, multi-env config |
@@ -548,5 +575,5 @@ Security and correctness fixes identified by automated code review on PR #2.
 ---
 
 **Last Updated:** 2026-03-02
-**Current Version:** 1.2.0
+**Current Version:** 1.3.0
 **Next Milestone:** See [Backlog](./backlog.md)

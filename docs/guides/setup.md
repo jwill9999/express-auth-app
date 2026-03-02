@@ -15,12 +15,12 @@ Getting started with the Express Auth API.
 ```bash
 git clone <repo>
 cd express-auth-app
-cp .env.example .env.development
+cp .env.development.example .env.development
 # Fill in JWT_SECRET, SESSION_SECRET, and any OAuth credentials
 docker compose up
 ```
 
-API available at `http://localhost:3000`. Swagger UI at `http://localhost:3000/api-docs`.
+API available at `http://localhost` (via Traefik on port 80). Swagger UI at `http://localhost/api-docs`. Traefik dashboard at `http://localhost:8080`.
 
 ---
 
@@ -28,7 +28,7 @@ API available at `http://localhost:3000`. Swagger UI at `http://localhost:3000/a
 
 ```bash
 npm install
-cp .env.example .env.development
+cp .env.development.example .env.development
 # Set MONGODB_URI=mongodb://localhost:27017/auth-app
 npm run dev
 ```

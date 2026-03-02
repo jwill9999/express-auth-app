@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import passport from 'passport';
+import rateLimit from 'express-rate-limit';
 import type { RegisterUser } from '../../../application/auth/use-cases/RegisterUser.js';
 import type { LoginUser } from '../../../application/auth/use-cases/LoginUser.js';
 import type { RefreshSessionUseCase } from '../../../application/auth/use-cases/RefreshSession.js';
@@ -18,6 +19,15 @@ import {
   SessionRevokedError,
   TokenReuseDetectedError,
 } from '../../../domain/auth/errors.js';
+import { validate } from '../validation/validate.js';
+import { registerSchema, loginSchema, adminRevokeSchema } from '../validation/schemas.js';
+
+const adminRevokeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 admin revoke requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export interface CookieOptions {
   httpOnly: boolean;
@@ -108,7 +118,7 @@ export class AuthController {
      *       500:
      *         description: Server error
      */
-    this.router.post('/register', this.register.bind(this));
+    this.router.post('/register', validate(registerSchema), this.register.bind(this));
 
     /**
      * @swagger
@@ -140,7 +150,7 @@ export class AuthController {
      *       500:
      *         description: Server error
      */
-    this.router.post('/login', this.login.bind(this));
+    this.router.post('/login', validate(loginSchema), this.login.bind(this));
 
     /**
      * @swagger
@@ -264,7 +274,12 @@ export class AuthController {
      *       403:
      *         description: Forbidden – caller is not an admin
      */
-    this.router.post('/admin/revoke', this.adminRevoke.bind(this));
+    this.router.post(
+      '/admin/revoke',
+      validate(adminRevokeSchema),
+      adminRevokeLimiter,
+      this.adminRevoke.bind(this),
+    );
 
     /**
      * @swagger
