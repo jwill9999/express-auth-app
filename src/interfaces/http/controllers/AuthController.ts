@@ -274,7 +274,12 @@ export class AuthController {
      *       403:
      *         description: Forbidden – caller is not an admin
      */
-    this.router.post('/admin/revoke', validate(adminRevokeSchema), adminRevokeLimiter, this.adminRevoke.bind(this));
+    this.router.post(
+      '/admin/revoke',
+      validate(adminRevokeSchema),
+      adminRevokeLimiter,
+      this.adminRevoke.bind(this),
+    );
 
     /**
      * @swagger
