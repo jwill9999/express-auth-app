@@ -1,4 +1,18 @@
 services:
+  traefik:
+    image: traefik:v3.3
+    container_name: express-auth-traefik-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.prod.yml:/etc/traefik/traefik.yml:ro
+      - letsencrypt_data:/letsencrypt
+    networks:
+      - auth-network
+
   mongodb:
     image: mongo:7.0
     container_name: express-auth-mongodb-prod
@@ -27,8 +41,8 @@ services:
       dockerfile: Dockerfile
     container_name: express-auth-app-prod
     restart: always
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     env_file:
       - .env.production
     depends_on:
@@ -36,11 +50,34 @@ services:
         condition: service_healthy
     networks:
       - auth-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
+      # Security headers middleware
+      - "traefik.http.middlewares.secheaders.headers.frameDeny=true"
+      - "traefik.http.middlewares.secheaders.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.secheaders.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.secheaders.headers.referrerPolicy=strict-origin-when-cross-origin"
+      - "traefik.http.middlewares.secheaders.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.secheaders.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.secheaders.headers.stsPreload=true"
+      - "traefik.http.routers.app.middlewares=secheaders"
 
 volumes:
   mongodb_data:
     driver: local
   mongodb_config:
+    driver: local
+  letsencrypt_data:
     driver: local
 
 networks:

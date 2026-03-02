@@ -1,0 +1,18 @@
+# Traefik static configuration — development
+# Used by docker-compose.yml
+
+api:
+  dashboard: true
+  insecure: true  # Exposes dashboard on :8080 (dev only — remove in prod)
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: auth-network
+
+log:
+  level: INFO
