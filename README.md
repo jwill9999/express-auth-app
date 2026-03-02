@@ -1,5 +1,8 @@
 # Express Authentication API
 
+[![CI](https://github.com/jwill9999/express-auth-app/actions/workflows/ci.yml/badge.svg)](https://github.com/jwill9999/express-auth-app/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwill9999/express-auth-app/branch/main/graph/badge.svg)](https://codecov.io/gh/jwill9999/express-auth-app)
+
 A **TypeScript** Node.js Express application with email/password authentication, Google SSO, JWT tokens, and protected routes.
 
 ## Architecture
