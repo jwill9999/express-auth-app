@@ -44,7 +44,6 @@ jobs:
     # Only run on pushes to main (not on PRs — no registry needed)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
-      contents: read
       security-events: write # upload SARIF to GitHub Security tab
 
     steps:
