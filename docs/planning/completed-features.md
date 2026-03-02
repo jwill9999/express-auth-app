@@ -494,23 +494,59 @@ Security and correctness fixes identified by automated code review on PR #2.
 
 ---
 
+### Unit Test Coverage ≥ 90% - 2026-03-02
+**Status:** ✅ Completed
+**Description:** Increased unit test coverage to a minimum of 90% across every layer of the Clean Architecture stack. Added Codecov integration with a coverage badge in the README.
+**Files Changed:**
+- `tests/domain/auth/` — entity, value object, and error class tests
+- `tests/application/auth/` — `RegisterUser`, `LoginUser` use-case tests with full branch and edge-case coverage
+- `tests/infrastructure/auth/` — `BcryptPasswordHasher`, `JwtTokenProvider`, `MongoUserRepository` tests
+- `tests/interfaces/http/` — controller integration tests, middleware, and error-mapping edge cases
+- `.github/workflows/ci.yml` — Codecov upload step added
+- `README.md` — Codecov badge added
+**Related Docs:**
+- [Changelog: 2026-03](../changelog/2026-03.md)
+
+---
+
+### CI/CD Pipeline Hardening + Branch Protection - 2026-03-02
+**Status:** ✅ Completed
+**Description:** Hardened CI/CD pipelines with security-first practices: pinned action SHAs, concurrency control, dependency CVE review, Docker container scanning, automated dependency updates, and enforced branch protection rules on `main`.
+**Files Changed:**
+- `.github/workflows/ci.yml` — format check, concurrency, SHA-pinned actions
+- `.github/workflows/pr-checks.yml` (new) — Dependency Review, fork-safe PR commenting
+- `.github/workflows/docker.yml` (new) — Docker build + Trivy CVE scan on PRs + SARIF upload post-merge
+- `.github/dependabot.yml` (new) — weekly npm + GitHub Actions updates with grouped PRs
+- `README.md` — CI/CD section added documenting all workflows, branch protection, and GitHub security settings
+**GitHub Settings configured:**
+- CodeQL Default Setup (SAST)
+- Secret Scanning + push protection
+- Dependency Graph + Dependabot alerts
+- Branch protection rules on `main`
+**Related Docs:**
+- [Changelog: 2026-03](../changelog/2026-03.md)
+
+---
+
 ## Summary Statistics
 
-**Total Features Completed:** 11
-**Total Files Created:** 45+
-**Total Lines of Code:** ~4,000+
-**Test Coverage:** 89 automated tests (unit + integration), all passing
-**Documentation Coverage:** 95%
+**Total Features Completed:** 13
+**Total Files Created:** 50+
+**Total Lines of Code:** ~4,500+
+**Test Coverage:** ≥ 90% across all layers (unit + integration), enforced in CI
+**Documentation Coverage:** 98%
 
 ## Version History
 
 | Version | Date       | Major Changes                                        |
 | ------- | ---------- | ---------------------------------------------------- |
+| 1.2.0   | 2026-03-02 | ≥90% test coverage, CI/CD hardening, branch protection, security scanning |
+| 1.1.3   | 2026-03-01 | Rate limiting, GitHub Pages docs site                |
 | 1.0.0   | 2026-02-15 | TypeScript migration, Docker setup, multi-env config |
 | 0.1.0   | 2026-02-14 | Initial JavaScript implementation                    |
 
 ---
 
-**Last Updated:** 2026-02-28
-**Current Version:** 1.1.2
+**Last Updated:** 2026-03-02
+**Current Version:** 1.2.0
 **Next Milestone:** See [Backlog](./backlog.md)

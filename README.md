@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/jwill9999/express-auth-app/actions/workflows/ci.yml/badge.svg)](https://github.com/jwill9999/express-auth-app/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/jwill9999/express-auth-app/branch/main/graph/badge.svg)](https://codecov.io/gh/jwill9999/express-auth-app)
+[![Dependency Review](https://github.com/jwill9999/express-auth-app/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/jwill9999/express-auth-app/actions/workflows/pr-checks.yml)
+[![Docker](https://github.com/jwill9999/express-auth-app/actions/workflows/docker.yml/badge.svg)](https://github.com/jwill9999/express-auth-app/actions/workflows/docker.yml)
 
 A **TypeScript** Node.js Express application with email/password authentication, Google SSO, JWT tokens, and protected routes.
 
@@ -29,6 +31,13 @@ Run `npm run lint:deps` to verify no architectural boundaries are violated.
 - ✅ Docker support with Docker Compose
 - ✅ Swagger API documentation
 - ✅ Request logging with Morgan
+- ✅ **≥ 90% unit test coverage** across all layers (domain, application, infrastructure, interfaces)
+- ✅ **CI/CD pipelines** — automated testing, linting, dependency review, container scanning on every PR
+- ✅ **Codecov** integration with coverage badge
+- ✅ **Dependabot** — automated weekly dependency and action-pin updates
+- ✅ **CodeQL SAST** — static analysis for JavaScript/TypeScript (enabled via GitHub Settings)
+- ✅ **Secret Scanning** with push protection (enabled via GitHub Settings)
+- ✅ **Trivy container CVE scanning** on every PR and post-merge to main
 
 ## Tech Stack
 
@@ -334,6 +343,78 @@ src/
 - Port: 3000
 - Automatically waits for MongoDB to be healthy
 - Environment-specific configuration loaded from respective `.env` files
+
+## CI/CD Pipelines
+
+Every push and pull request targeting `main` runs the following automated checks. **All four gates must pass before a PR can be merged.**
+
+### Workflow overview
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| [CI](.github/workflows/ci.yml) | push + PR → main | Typecheck, lint, architecture boundary check, format check, tests, coverage upload to Codecov |
+| [PR Checks](.github/workflows/pr-checks.yml) | PR → main | Dependency Review — blocks PRs that introduce HIGH/CRITICAL CVE dependencies |
+| [Docker](.github/workflows/docker.yml) | push + PR → main | Docker image build verification + Trivy container CVE scan |
+| [Dependabot](.github/dependabot.yml) | weekly (Monday) | Automated PRs to update npm deps and pin GitHub Actions to latest SHAs |
+
+### CI (`ci.yml`)
+
+Runs on every push to `main` and every PR targeting `main`.
+
+Steps in order:
+1. **Typecheck** — `tsc --noEmit`
+2. **Lint** — ESLint over `src/`
+3. **Architecture boundaries** — `dependency-cruiser` enforces Clean Architecture layer rules
+4. **Format check** — Prettier consistency check
+5. **Tests with coverage** — Vitest; ≥ 90% coverage enforced across all layers
+6. **Codecov upload** — Coverage report published; badge kept current on `main`
+
+### PR Checks (`pr-checks.yml`)
+
+Runs only on PRs targeting `main`.
+
+- **Dependency Review** — compares the dependency graph before and after the PR; fails on any new HIGH or CRITICAL severity CVE being introduced.
+- Comments a summary on non-fork PRs (fork PRs use a read-only token so commenting is skipped).
+
+### Docker (`docker.yml`)
+
+Runs on every push to `main` and every PR targeting `main`.
+
+Two jobs:
+
+| Job | When | What it does |
+|-----|------|--------------|
+| **Docker Build** | always | Builds the production image to confirm the `Dockerfile` is healthy |
+| **Trivy CVE Scan** | always | Scans the built image for HIGH/CRITICAL CVEs; results visible in Actions log on PRs, uploaded to the GitHub Security tab on push to main |
+
+> **Note:** `exit-code: 0` is set so existing base-image CVEs don't block every PR. Raise to `1` once the image is fully clean.
+
+### Dependabot (`.github/dependabot.yml`)
+
+Automated weekly pull requests (Mondays 09:00 UTC+0 London) for:
+- **`github-actions`** — keeps all action SHA pins current
+- **`npm`** — keeps application dependencies up to date; `@types/*` and `eslint*` packages are batched into grouped PRs to reduce noise
+
+### Security features (enabled in GitHub Settings)
+
+These run outside of workflow files and are configured directly in the repository:
+
+| Feature | Location |
+|---------|---------|
+| **CodeQL SAST** | Settings → Code security → Code scanning → Default setup |
+| **Secret Scanning + Push Protection** | Settings → Code security → Secret scanning |
+| **Dependency Graph** | Settings → Code security → Dependency graph |
+| **Dependabot Alerts** | Enabled automatically once Dependency Graph is on |
+
+### Branch protection (`main`)
+
+The following rules are enforced on `main`:
+
+- ✅ All four required status checks must pass: `Test & Coverage`, `Dependency Review`, `Docker Build`, `Analyze (javascript-typescript)`
+- ✅ Branch must be up to date with `main` before merging
+- ✅ At least 1 approving review required; stale reviews dismissed on new commits
+- ✅ Force pushes and branch deletion are blocked
+- ✅ Rules apply to administrators
 
 ## Security Notes
 
