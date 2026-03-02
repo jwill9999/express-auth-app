@@ -111,4 +111,36 @@ describe('RegisterUser Use Case', () => {
       registerUser.execute({ email: 'test@example.com', password: 'Password1!' }),
     ).rejects.toThrow(UserAlreadyExistsError);
   });
+
+  describe('with createRefreshSession', () => {
+    it('should include refreshToken in result when createRefreshSession is provided', async () => {
+      const mockCreateRefreshSession = {
+        execute: vi.fn().mockResolvedValue('refresh-token-xyz'),
+      };
+      const registerUserWithRefresh = new RegisterUser(
+        userRepo,
+        passwordHasher,
+        tokenProvider,
+        mockCreateRefreshSession,
+      );
+
+      const result = await registerUserWithRefresh.execute({
+        email: 'test@example.com',
+        password: 'Password1!',
+        name: 'Test User',
+      });
+
+      expect(result.refreshToken).toBe('refresh-token-xyz');
+      expect(mockCreateRefreshSession.execute).toHaveBeenCalledWith('generated-id');
+    });
+
+    it('should not include refreshToken when createRefreshSession is not provided', async () => {
+      const result = await registerUser.execute({
+        email: 'test@example.com',
+        password: 'Password1!',
+      });
+
+      expect(result.refreshToken).toBeUndefined();
+    });
+  });
 });

@@ -83,4 +83,33 @@ describe('LoginUser Use Case', () => {
       loginUser.execute({ email: 'test@example.com', password: 'WrongPass1!' }),
     ).rejects.toThrow(InvalidCredentialsError);
   });
+
+  describe('with createRefreshSession', () => {
+    it('should include refreshToken in result when createRefreshSession is provided', async () => {
+      const mockCreateRefreshSession = { execute: vi.fn().mockResolvedValue('refresh-token-abc') };
+      const loginUserWithRefresh = new LoginUser(
+        userRepo,
+        passwordHasher,
+        tokenProvider,
+        mockCreateRefreshSession,
+      );
+
+      const result = await loginUserWithRefresh.execute({
+        email: 'test@example.com',
+        password: 'Password1!',
+      });
+
+      expect(result.refreshToken).toBe('refresh-token-abc');
+      expect(mockCreateRefreshSession.execute).toHaveBeenCalledWith('user-1');
+    });
+
+    it('should not include refreshToken when createRefreshSession is not provided', async () => {
+      const result = await loginUser.execute({
+        email: 'test@example.com',
+        password: 'Password1!',
+      });
+
+      expect(result.refreshToken).toBeUndefined();
+    });
+  });
 });
