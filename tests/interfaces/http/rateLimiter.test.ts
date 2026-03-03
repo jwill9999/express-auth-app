@@ -5,6 +5,8 @@ import type { RegisterUser } from '../../../src/application/auth/use-cases/Regis
 import type { LoginUser } from '../../../src/application/auth/use-cases/LoginUser.js';
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+
 describe('Rate Limiting', () => {
   let mockRegisterUser: RegisterUser;
   let mockLoginUser: LoginUser;
@@ -12,11 +14,15 @@ describe('Rate Limiting', () => {
 
   beforeEach(() => {
     mockRegisterUser = {
-      execute: vi.fn().mockResolvedValue({ token: 'tok', user: { id: '1', email: 'a@b.com', name: 'A' } }),
+      execute: vi
+        .fn()
+        .mockResolvedValue({ token: 'tok', user: { id: '1', email: 'a@b.com', name: 'A' } }),
     } as unknown as RegisterUser;
 
     mockLoginUser = {
-      execute: vi.fn().mockResolvedValue({ token: 'tok', user: { id: '1', email: 'a@b.com', name: 'A' } }),
+      execute: vi
+        .fn()
+        .mockResolvedValue({ token: 'tok', user: { id: '1', email: 'a@b.com', name: 'A' } }),
     } as unknown as LoginUser;
 
     mockTokenProvider = {
@@ -34,7 +40,7 @@ describe('Rate Limiting', () => {
       rateLimiting: true,
     });
 
-    const payload = { email: 'a@b.com', password: 'Password1!', name: 'A' };
+    const payload = { email: 'a@b.com', password: buildStrongCredential(), name: 'A' };
 
     // First 5 should succeed (or fail for domain reasons, not rate limiting)
     for (let i = 0; i < 5; i++) {
@@ -58,7 +64,7 @@ describe('Rate Limiting', () => {
 
     const res = await request(app)
       .post('/auth/login')
-      .send({ email: 'a@b.com', password: 'Password1!' });
+      .send({ email: 'a@b.com', password: buildStrongCredential() });
 
     expect(res.headers['ratelimit-limit']).toBeDefined();
     expect(res.headers['ratelimit-remaining']).toBeDefined();

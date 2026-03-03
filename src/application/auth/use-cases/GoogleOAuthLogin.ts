@@ -9,8 +9,8 @@ export interface GoogleOAuthUser {
 
 export class GoogleOAuthLogin {
   constructor(
-    private tokenProvider: TokenProvider,
-    private createRefreshSession?: CreateRefreshSession,
+    private readonly tokenProvider: TokenProvider,
+    private readonly createRefreshSession?: CreateRefreshSession,
   ) {}
 
   async execute(user: GoogleOAuthUser): Promise<{

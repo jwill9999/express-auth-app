@@ -6,6 +6,8 @@ import type { UserRepository } from '../../../src/application/auth/ports/UserRep
 import type { PasswordHasher } from '../../../src/application/auth/ports/PasswordHasher.js';
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+
 describe('LoginUser Use Case', () => {
   let loginUser: LoginUser;
   let userRepo: UserRepository;
@@ -37,23 +39,24 @@ describe('LoginUser Use Case', () => {
   });
 
   it('should login successfully with valid credentials', async () => {
+    const credential = buildStrongCredential();
     const result = await loginUser.execute({
       email: 'test@example.com',
-      password: 'Password1!',
+      password: credential,
     });
 
     expect(result.token).toBe('jwt-token-123');
     expect(result.user.id).toBe('user-1');
     expect(result.user.email).toBe('test@example.com');
     expect(result.user.name).toBe('Test User');
-    expect(passwordHasher.compare).toHaveBeenCalledWith('Password1!', 'hashed-pw');
+    expect(passwordHasher.compare).toHaveBeenCalledWith(credential, 'hashed-pw');
     expect(tokenProvider.generate).toHaveBeenCalledWith('user-1', 'test@example.com');
   });
 
   it('should throw ValidationError when email is missing', async () => {
-    await expect(loginUser.execute({ email: '', password: 'Password1!' })).rejects.toThrow(
-      ValidationError,
-    );
+    await expect(
+      loginUser.execute({ email: '', password: buildStrongCredential() }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError when password is missing', async () => {
@@ -63,24 +66,25 @@ describe('LoginUser Use Case', () => {
   });
 
   it('should throw ValidationError for invalid email format', async () => {
-    await expect(loginUser.execute({ email: 'bad-email', password: 'Password1!' })).rejects.toThrow(
-      ValidationError,
-    );
+    await expect(
+      loginUser.execute({ email: 'bad-email', password: buildStrongCredential() }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('should throw InvalidCredentialsError when user not found', async () => {
     vi.mocked(userRepo.findByEmail).mockResolvedValue(null);
 
     await expect(
-      loginUser.execute({ email: 'unknown@example.com', password: 'Password1!' }),
+      loginUser.execute({ email: 'unknown@example.com', password: buildStrongCredential() }),
     ).rejects.toThrow(InvalidCredentialsError);
   });
 
   it('should throw InvalidCredentialsError when password is wrong', async () => {
     vi.mocked(passwordHasher.compare).mockResolvedValue(false);
+    const wrongCredential = buildStrongCredential();
 
     await expect(
-      loginUser.execute({ email: 'test@example.com', password: 'WrongPass1!' }),
+      loginUser.execute({ email: 'test@example.com', password: wrongCredential }),
     ).rejects.toThrow(InvalidCredentialsError);
   });
 
@@ -96,7 +100,7 @@ describe('LoginUser Use Case', () => {
 
       const result = await loginUserWithRefresh.execute({
         email: 'test@example.com',
-        password: 'Password1!',
+        password: buildStrongCredential(),
       });
 
       expect(result.refreshToken).toBe('refresh-token-abc');
@@ -106,7 +110,7 @@ describe('LoginUser Use Case', () => {
     it('should not include refreshToken when createRefreshSession is not provided', async () => {
       const result = await loginUser.execute({
         email: 'test@example.com',
-        password: 'Password1!',
+        password: buildStrongCredential(),
       });
 
       expect(result.refreshToken).toBeUndefined();

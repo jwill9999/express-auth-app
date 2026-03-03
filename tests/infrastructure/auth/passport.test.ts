@@ -20,9 +20,8 @@ vi.mock('passport-google-oauth20', () => ({
 }));
 
 // Import AFTER mocking so the mock takes effect
-const { configurePassport } = await import(
-  '../../../src/infrastructure/auth/providers/passport.js'
-);
+const { configurePassport } =
+  await import('../../../src/infrastructure/auth/providers/passport.js');
 
 const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
   id: 'google-profile-id',
@@ -113,7 +112,7 @@ describe('configurePassport', () => {
   describe('GoogleStrategy verify callback', () => {
     beforeEach(() => {
       configurePassport(
-        { clientId: 'client-id', clientSecret: 'client-secret', callbackUrl: 'http://cb' },
+        { clientId: 'client-id', clientSecret: 'client-secret', callbackUrl: 'https://cb' },
         userRepo,
       );
     });

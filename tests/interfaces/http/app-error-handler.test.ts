@@ -5,6 +5,8 @@ import type { RegisterUser } from '../../../src/application/auth/use-cases/Regis
 import type { LoginUser } from '../../../src/application/auth/use-cases/LoginUser.js';
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+
 describe('createApp - error handler and rate limiting', () => {
   const mockTokenProvider: TokenProvider = {
     generate: vi.fn(),
@@ -28,7 +30,7 @@ describe('createApp - error handler and rate limiting', () => {
 
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'test@example.com', password: 'Password1!' });
+        .send({ email: 'test@example.com', password: buildStrongCredential() });
 
       expect(res.status).toBe(500);
       expect(res.body.success).toBe(false);
@@ -53,7 +55,7 @@ describe('createApp - error handler and rate limiting', () => {
       // Rate limiters exist but won't block on a single request
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'a@b.com', password: 'Password1!', name: 'A' });
+        .send({ email: 'a@b.com', password: buildStrongCredential(), name: 'A' });
 
       // Just verify the app is working (rate limiter doesn't block first request)
       expect([200, 201, 400, 429]).toContain(res.status);

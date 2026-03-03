@@ -10,7 +10,7 @@ export function createAuthMiddleware(tokenProvider: TokenProvider): RequestHandl
     const authReq = req as AuthRequest;
     try {
       const authHeader = authReq.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ success: false, message: 'No token provided' });
         return;
       }

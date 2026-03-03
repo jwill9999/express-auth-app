@@ -19,8 +19,12 @@ export class RegisterUser {
       throw new ValidationError('Email and password are required');
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(input.email)) {
+    const atIndex = input.email.indexOf('@');
+    const domainPart = atIndex >= 0 ? input.email.slice(atIndex + 1) : '';
+    const hasSingleAt = atIndex > 0 && atIndex === input.email.lastIndexOf('@');
+    const hasValidDomain =
+      domainPart.length > 2 && domainPart.includes('.') && !domainPart.endsWith('.');
+    if (!hasSingleAt || !hasValidDomain) {
       throw new ValidationError('Invalid email format');
     }
 

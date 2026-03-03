@@ -10,9 +10,9 @@ interface AuthRequest extends Request {
 }
 
 export class ProtectedController {
-  private router: Router;
+  private readonly router: Router;
 
-  constructor(private authMiddleware: RequestHandler) {
+  constructor(private readonly authMiddleware: RequestHandler) {
     this.router = Router();
     this.setupRoutes();
   }
@@ -57,7 +57,7 @@ export class ProtectedController {
 
   private getData(req: Request, res: Response): void {
     const authReq = req as AuthRequest;
-    const user = authReq.user;
+    const { user } = authReq;
 
     if (!user) {
       res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -86,7 +86,7 @@ export class ProtectedController {
 
   private getProfile(req: Request, res: Response): void {
     const authReq = req as AuthRequest;
-    const user = authReq.user;
+    const { user } = authReq;
 
     if (!user) {
       res.status(401).json({ success: false, message: 'User not authenticated' });
