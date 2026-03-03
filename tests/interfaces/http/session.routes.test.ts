@@ -17,6 +17,8 @@ import type { AdminRevokeSessions } from '../../../src/application/auth/use-case
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 import type { Application } from 'express';
 
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+
 describe('Session Lifecycle Routes', () => {
   let app: Application;
   let mockTokenProvider: TokenProvider;
@@ -84,7 +86,7 @@ describe('Session Lifecycle Routes', () => {
     it('should set refresh token cookie on registration', async () => {
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'test@example.com', password: 'Password1!', name: 'Test User' });
+        .send({ email: 'test@example.com', password: buildStrongCredential(), name: 'Test User' });
 
       expect(res.status).toBe(201);
       expect(res.body.token).toBe('access-token');
@@ -100,7 +102,7 @@ describe('Session Lifecycle Routes', () => {
     it('should set refresh token cookie on login', async () => {
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'test@example.com', password: 'Password1!' });
+        .send({ email: 'test@example.com', password: buildStrongCredential() });
 
       expect(res.status).toBe(200);
       expect(res.body.token).toBe('access-token');
@@ -221,7 +223,10 @@ describe('Session Lifecycle Routes', () => {
     });
 
     it('should return 403 when authenticated user is not an admin', async () => {
-      vi.mocked(mockTokenProvider.verify).mockReturnValueOnce({ id: 'non-admin-id', email: 'other@example.com' });
+      vi.mocked(mockTokenProvider.verify).mockReturnValueOnce({
+        id: 'non-admin-id',
+        email: 'other@example.com',
+      });
 
       const res = await request(app)
         .post('/auth/admin/revoke')
@@ -279,9 +284,7 @@ describe('Session Lifecycle Routes', () => {
     it('should return 401 on revoked session', async () => {
       vi.mocked(mockRefreshSession.execute).mockRejectedValue(new SessionRevokedError());
 
-      const res = await request(app)
-        .post('/auth/refresh')
-        .send({ refreshToken: 'revoked-token' });
+      const res = await request(app).post('/auth/refresh').send({ refreshToken: 'revoked-token' });
 
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
@@ -292,9 +295,7 @@ describe('Session Lifecycle Routes', () => {
     it('should succeed even when logoutCurrentSession throws', async () => {
       vi.mocked(mockLogoutCurrent.execute).mockRejectedValue(new Error('DB failure'));
 
-      const res = await request(app)
-        .post('/auth/logout')
-        .send({ refreshToken: 'some-token' });
+      const res = await request(app).post('/auth/logout').send({ refreshToken: 'some-token' });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -333,10 +334,15 @@ describe('Session Lifecycle Routes', () => {
       };
 
       const appWithGoogle = createApp({
-        registerUser: { execute: vi.fn() } as unknown as import('../../../src/application/auth/use-cases/RegisterUser.js').RegisterUser,
-        loginUser: { execute: vi.fn() } as unknown as import('../../../src/application/auth/use-cases/LoginUser.js').LoginUser,
+        registerUser: {
+          execute: vi.fn(),
+        } as unknown as import('../../../src/application/auth/use-cases/RegisterUser.js').RegisterUser,
+        loginUser: {
+          execute: vi.fn(),
+        } as unknown as import('../../../src/application/auth/use-cases/LoginUser.js').LoginUser,
         tokenProvider: mockTokenProvider,
-        googleOAuthLogin: mockGoogleOAuthLogin as unknown as import('../../../src/application/auth/use-cases/GoogleOAuthLogin.js').GoogleOAuthLogin,
+        googleOAuthLogin:
+          mockGoogleOAuthLogin as unknown as import('../../../src/application/auth/use-cases/GoogleOAuthLogin.js').GoogleOAuthLogin,
         rateLimiting: false,
       });
 

@@ -1,12 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MongoUserRepository, UserModel } from '../../../src/infrastructure/auth/repositories/MongoUserRepository.js';
+import {
+  MongoUserRepository,
+  UserModel,
+} from '../../../src/infrastructure/auth/repositories/MongoUserRepository.js';
 import { User } from '../../../src/domain/auth/User.js';
+
+const DEFAULT_HASH = 'hash-value-123';
+const buildHashValue = (): string => `hash-${crypto.randomUUID()}`;
 
 // Helper to create a mock Mongoose document resembling a UserDocument
 const makeUserDoc = (overrides = {}) => ({
   _id: { toString: () => 'user-id-1' },
   email: 'test@example.com',
-  password: 'hashed-pw',
+  password: DEFAULT_HASH,
   name: 'Test User',
   googleId: undefined as string | undefined,
   createdAt: new Date('2024-01-01'),
@@ -40,7 +46,7 @@ describe('MongoUserRepository', () => {
       expect(result?.id).toBe('user-id-1');
       expect(result?.email).toBe('test@example.com');
       expect(result?.name).toBe('Test User');
-      expect(result?.getPasswordHash()).toBe('hashed-pw');
+      expect(result?.getPasswordHash()).toBe(DEFAULT_HASH);
     });
 
     it('should map googleId when present', async () => {
@@ -140,7 +146,7 @@ describe('MongoUserRepository', () => {
     it('should update a user document and return updated User', async () => {
       vi.spyOn(UserModel, 'findByIdAndUpdate').mockResolvedValue(makeUserDoc() as never);
 
-      const user = new User('user-id-1', 'test@example.com', 'hashed-pw', 'Test User');
+      const user = new User('user-id-1', 'test@example.com', buildHashValue(), 'Test User');
       const result = await repo.update(user);
 
       expect(result).toBeInstanceOf(User);
@@ -154,12 +160,13 @@ describe('MongoUserRepository', () => {
     it('should include password in update when user has a password hash', async () => {
       vi.spyOn(UserModel, 'findByIdAndUpdate').mockResolvedValue(makeUserDoc() as never);
 
-      const user = new User('user-id-1', 'test@example.com', 'new-hash');
+      const updatedHash = buildHashValue();
+      const user = new User('user-id-1', 'test@example.com', updatedHash);
       await repo.update(user);
 
       expect(UserModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'user-id-1',
-        expect.objectContaining({ password: 'new-hash' }),
+        expect.objectContaining({ password: updatedHash }),
         { new: true },
       );
     });
@@ -177,7 +184,7 @@ describe('MongoUserRepository', () => {
     it('should throw when document is not found during update', async () => {
       vi.spyOn(UserModel, 'findByIdAndUpdate').mockResolvedValue(null as never);
 
-      const user = new User('nonexistent', 'x@example.com', 'pw');
+      const user = new User('nonexistent', 'x@example.com', buildHashValue());
       await expect(repo.update(user)).rejects.toThrow('User not found');
     });
   });

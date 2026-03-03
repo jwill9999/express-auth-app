@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../../src/interfaces/http/app.js';
-import { User } from '../../../src/domain/auth/User.js';
 import {
   InvalidCredentialsError,
   UserAlreadyExistsError,
@@ -11,6 +10,8 @@ import type { RegisterUser } from '../../../src/application/auth/use-cases/Regis
 import type { LoginUser } from '../../../src/application/auth/use-cases/LoginUser.js';
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 import type { Application } from 'express';
+
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
 
 describe('Auth Routes', () => {
   let app: Application;
@@ -50,7 +51,7 @@ describe('Auth Routes', () => {
     it('should return 201 on successful registration', async () => {
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'test@example.com', password: 'Password1!', name: 'Test User' });
+        .send({ email: 'test@example.com', password: buildStrongCredential(), name: 'Test User' });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -74,7 +75,7 @@ describe('Auth Routes', () => {
 
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'existing@example.com', password: 'Password1!' });
+        .send({ email: 'existing@example.com', password: buildStrongCredential() });
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
@@ -86,7 +87,7 @@ describe('Auth Routes', () => {
     it('should return 200 on successful login', async () => {
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'test@example.com', password: 'Password1!' });
+        .send({ email: 'test@example.com', password: buildStrongCredential() });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -99,7 +100,7 @@ describe('Auth Routes', () => {
 
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'test@example.com', password: 'WrongPass1!' });
+        .send({ email: 'test@example.com', password: buildStrongCredential() });
 
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
@@ -113,7 +114,7 @@ describe('Auth Routes', () => {
 
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'bad-email', password: 'Password1!' });
+        .send({ email: 'bad-email', password: buildStrongCredential() });
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);

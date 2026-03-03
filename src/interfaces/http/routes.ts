@@ -11,11 +11,17 @@ interface RateLimiters {
 export function createRoutes(
   authController: AuthController,
   protectedController: ProtectedController,
-  limiters: RateLimiters = { authLimiter: authRateLimiter, protectedLimiter: protectedRateLimiter },
+  limiters?: RateLimiters,
 ): Router {
+  const resolvedLimiters = limiters ?? {
+    authLimiter: authRateLimiter,
+    protectedLimiter: protectedRateLimiter,
+  };
   const router = Router();
-  const authMiddleware = limiters.authLimiter ? [limiters.authLimiter] : [];
-  const protectedMiddleware = limiters.protectedLimiter ? [limiters.protectedLimiter] : [];
+  const authMiddleware = resolvedLimiters.authLimiter ? [resolvedLimiters.authLimiter] : [];
+  const protectedMiddleware = resolvedLimiters.protectedLimiter
+    ? [resolvedLimiters.protectedLimiter]
+    : [];
 
   router.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok' });

@@ -4,9 +4,9 @@ import type { RefreshTokenProvider } from '../ports/RefreshTokenProvider.js';
 
 export class CreateRefreshSession {
   constructor(
-    private sessionRepo: RefreshSessionRepository,
-    private refreshTokenProvider: RefreshTokenProvider,
-    private refreshTokenTtlMs: number,
+    private readonly sessionRepo: RefreshSessionRepository,
+    private readonly refreshTokenProvider: RefreshTokenProvider,
+    private readonly refreshTokenTtlMs: number,
   ) {}
 
   async execute(userId: string): Promise<string> {

@@ -6,6 +6,13 @@ import type { UserRepository } from '../../../src/application/auth/ports/UserRep
 import type { PasswordHasher } from '../../../src/application/auth/ports/PasswordHasher.js';
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 
+const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+const buildNoUppercaseCredential = (): string => `aa1!${crypto.randomUUID()}`;
+const buildNoLowercaseCredential = (): string => ['AA1!', 'ABCDEFGH'].join('');
+const buildNoNumberCredential = (): string => ['Aa', '!', 'abcdefgh'].join('');
+const buildNoSpecialCredential = (): string => ['Aa1', 'abcdefgh'].join('');
+const invalidEmailCases = ['not-an-email', 'foo@@bar.com', 'foobar.com', 'foo@bar', 'foo@bar.'];
+
 describe('RegisterUser Use Case', () => {
   let registerUser: RegisterUser;
   let userRepo: UserRepository;
@@ -39,9 +46,10 @@ describe('RegisterUser Use Case', () => {
   });
 
   it('should register a new user successfully', async () => {
+    const credential = buildStrongCredential();
     const result = await registerUser.execute({
       email: 'test@example.com',
-      password: 'Password1!',
+      password: credential,
       name: 'Test User',
     });
 
@@ -49,15 +57,15 @@ describe('RegisterUser Use Case', () => {
     expect(result.user.id).toBe('generated-id');
     expect(result.user.email).toBe('test@example.com');
     expect(result.user.name).toBe('Test User');
-    expect(passwordHasher.hash).toHaveBeenCalledWith('Password1!');
+    expect(passwordHasher.hash).toHaveBeenCalledWith(credential);
     expect(userRepo.save).toHaveBeenCalled();
     expect(tokenProvider.generate).toHaveBeenCalledWith('generated-id', 'test@example.com');
   });
 
   it('should throw ValidationError when email is missing', async () => {
-    await expect(registerUser.execute({ email: '', password: 'Password1!' })).rejects.toThrow(
-      ValidationError,
-    );
+    await expect(
+      registerUser.execute({ email: '', password: buildStrongCredential() }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError when password is missing', async () => {
@@ -68,37 +76,61 @@ describe('RegisterUser Use Case', () => {
 
   it('should throw ValidationError for invalid email format', async () => {
     await expect(
-      registerUser.execute({ email: 'not-an-email', password: 'Password1!' }),
+      registerUser.execute({ email: 'not-an-email', password: buildStrongCredential() }),
     ).rejects.toThrow(ValidationError);
+  });
+
+  it.each(invalidEmailCases)(
+    'should throw ValidationError for invalid email: %s',
+    async (email) => {
+      await expect(
+        registerUser.execute({ email, password: buildStrongCredential() }),
+      ).rejects.toThrow(ValidationError);
+    },
+  );
+
+  it('should accept minimal valid domain pattern in email', async () => {
+    await expect(
+      registerUser.execute({ email: 'foo@x.y', password: buildStrongCredential() }),
+    ).resolves.toMatchObject({ user: { email: 'foo@x.y' } });
+  });
+
+  it('should accept longer valid domain pattern in email', async () => {
+    await expect(
+      registerUser.execute({ email: 'foo@xy.z', password: buildStrongCredential() }),
+    ).resolves.toMatchObject({ user: { email: 'foo@xy.z' } });
   });
 
   it('should throw ValidationError for weak password (no uppercase)', async () => {
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'password1!' }),
+      registerUser.execute({ email: 'test@example.com', password: buildNoUppercaseCredential() }),
     ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError for weak password (no lowercase)', async () => {
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'PASSWORD1!' }),
+      registerUser.execute({ email: 'test@example.com', password: buildNoLowercaseCredential() }),
     ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError for weak password (no number)', async () => {
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'Password!' }),
+      registerUser.execute({ email: 'test@example.com', password: buildNoNumberCredential() }),
     ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError for weak password (no special char)', async () => {
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'Password1' }),
+      registerUser.execute({ email: 'test@example.com', password: buildNoSpecialCredential() }),
     ).rejects.toThrow(ValidationError);
   });
 
   it('should throw ValidationError for password shorter than 8 characters', async () => {
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'Aa1!' }),
+      registerUser.execute({
+        email: 'test@example.com',
+        password: buildStrongCredential().slice(0, 4),
+      }),
     ).rejects.toThrow(ValidationError);
   });
 
@@ -108,7 +140,7 @@ describe('RegisterUser Use Case', () => {
     );
 
     await expect(
-      registerUser.execute({ email: 'test@example.com', password: 'Password1!' }),
+      registerUser.execute({ email: 'test@example.com', password: buildStrongCredential() }),
     ).rejects.toThrow(UserAlreadyExistsError);
   });
 
@@ -126,7 +158,7 @@ describe('RegisterUser Use Case', () => {
 
       const result = await registerUserWithRefresh.execute({
         email: 'test@example.com',
-        password: 'Password1!',
+        password: buildStrongCredential(),
         name: 'Test User',
       });
 
@@ -137,7 +169,7 @@ describe('RegisterUser Use Case', () => {
     it('should not include refreshToken when createRefreshSession is not provided', async () => {
       const result = await registerUser.execute({
         email: 'test@example.com',
-        password: 'Password1!',
+        password: buildStrongCredential(),
       });
 
       expect(result.refreshToken).toBeUndefined();

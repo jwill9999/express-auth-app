@@ -4,6 +4,7 @@ import type { PasswordHasher } from '../ports/PasswordHasher.js';
 import type { TokenProvider } from '../ports/TokenProvider.js';
 import type { LoginDTO } from '../dtos/LoginDTO.js';
 import type { CreateRefreshSession } from './CreateRefreshSession.js';
+import { hasValidEmailFormat } from '../utils/emailValidation.js';
 
 export class LoginUser {
   constructor(
@@ -18,8 +19,7 @@ export class LoginUser {
       throw new ValidationError('Email and password are required');
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(input.email)) {
+    if (!hasValidEmailFormat(input.email)) {
       throw new ValidationError('Invalid email format');
     }
 
