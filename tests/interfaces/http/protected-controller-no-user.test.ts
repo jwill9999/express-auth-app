@@ -30,26 +30,19 @@ describe('ProtectedController - missing user guard branches', () => {
     };
   };
 
-  describe('GET /api/data', () => {
-    it('should return 401 when req.user is not set by middleware', async () => {
-      const app = makeApp(noUserMiddleware);
-      const res = await request(app).get('/api/data');
+  describe('missing user responses', () => {
+    const protectedRoutes = ['/api/data', '/api/profile'];
 
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.message).toBe('User not authenticated');
-    });
-  });
+    for (const route of protectedRoutes) {
+      it(`should return 401 when req.user is not set for ${route}`, async () => {
+        const app = makeApp(noUserMiddleware);
+        const res = await request(app).get(route);
 
-  describe('GET /api/profile', () => {
-    it('should return 401 when req.user is not set by middleware', async () => {
-      const app = makeApp(noUserMiddleware);
-      const res = await request(app).get('/api/profile');
-
-      expect(res.status).toBe(401);
-      expect(res.body.success).toBe(false);
-      expect(res.body.message).toBe('User not authenticated');
-    });
+        expect(res.status).toBe(401);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe('User not authenticated');
+      });
+    }
   });
 
   describe('GET /api/data - with user set', () => {

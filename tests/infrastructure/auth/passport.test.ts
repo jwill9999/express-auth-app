@@ -117,6 +117,25 @@ describe('configurePassport', () => {
       );
     });
 
+    const runExistingEmailLinkFlow = async (name: string, expectedName: string) => {
+      vi.mocked(userRepo.findByGoogleId).mockResolvedValue(null);
+      const emailUser = new User('email-user', 'new@google.com', 'hashed', name);
+      vi.mocked(userRepo.findByEmail).mockResolvedValue(emailUser);
+      const updatedUser = new User(
+        'email-user',
+        'new@google.com',
+        'hashed',
+        expectedName,
+        'google-profile-id',
+      );
+      vi.mocked(userRepo.update).mockResolvedValue(updatedUser);
+
+      const done = vi.fn();
+      await capturedVerify?.('_access', '_refresh', makeProfile(), done);
+
+      return { done, updatedUser };
+    };
+
     it('should return existing user when found by googleId', async () => {
       vi.mocked(userRepo.findByGoogleId).mockResolvedValue(existingUser);
 
@@ -127,40 +146,17 @@ describe('configurePassport', () => {
     });
 
     it('should link Google account to existing email user and return updated user', async () => {
-      vi.mocked(userRepo.findByGoogleId).mockResolvedValue(null);
-      const emailUser = new User('email-user', 'new@google.com', 'hashed', 'Existing Name');
-      vi.mocked(userRepo.findByEmail).mockResolvedValue(emailUser);
-      const updatedUser = new User(
-        'email-user',
-        'new@google.com',
-        'hashed',
+      const { done, updatedUser } = await runExistingEmailLinkFlow(
         'Existing Name',
-        'google-profile-id',
+        'Existing Name',
       );
-      vi.mocked(userRepo.update).mockResolvedValue(updatedUser);
-
-      const done = vi.fn();
-      await capturedVerify?.('_access', '_refresh', makeProfile(), done);
 
       expect(userRepo.update).toHaveBeenCalled();
       expect(done).toHaveBeenCalledWith(null, updatedUser);
     });
 
     it('should use profile displayName when existing email user has no name', async () => {
-      vi.mocked(userRepo.findByGoogleId).mockResolvedValue(null);
-      const emailUser = new User('email-user', 'new@google.com', 'hashed', '');
-      vi.mocked(userRepo.findByEmail).mockResolvedValue(emailUser);
-      const updatedUser = new User(
-        'email-user',
-        'new@google.com',
-        'hashed',
-        'New Google User', // displayName used as fallback
-        'google-profile-id',
-      );
-      vi.mocked(userRepo.update).mockResolvedValue(updatedUser);
-
-      const done = vi.fn();
-      await capturedVerify?.('_access', '_refresh', makeProfile(), done);
+      const { done, updatedUser } = await runExistingEmailLinkFlow('', 'New Google User');
 
       expect(userRepo.update).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'New Google User' }),

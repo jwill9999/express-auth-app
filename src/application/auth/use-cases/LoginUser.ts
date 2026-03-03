@@ -4,6 +4,7 @@ import type { PasswordHasher } from '../ports/PasswordHasher.js';
 import type { TokenProvider } from '../ports/TokenProvider.js';
 import type { LoginDTO } from '../dtos/LoginDTO.js';
 import type { CreateRefreshSession } from './CreateRefreshSession.js';
+import { hasValidEmailFormat } from '../utils/emailValidation.js';
 
 export class LoginUser {
   constructor(
@@ -18,12 +19,7 @@ export class LoginUser {
       throw new ValidationError('Email and password are required');
     }
 
-    const atIndex = input.email.indexOf('@');
-    const domainPart = atIndex >= 0 ? input.email.slice(atIndex + 1) : '';
-    const hasSingleAt = atIndex > 0 && atIndex === input.email.lastIndexOf('@');
-    const hasValidDomain =
-      domainPart.length > 2 && domainPart.includes('.') && !domainPart.endsWith('.');
-    if (!hasSingleAt || !hasValidDomain) {
+    if (!hasValidEmailFormat(input.email)) {
       throw new ValidationError('Invalid email format');
     }
 
