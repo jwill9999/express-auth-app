@@ -5,13 +5,14 @@ import {
 } from '../../../src/infrastructure/auth/repositories/MongoUserRepository.js';
 import { User } from '../../../src/domain/auth/User.js';
 
+const DEFAULT_HASH = 'hash-value-123';
 const buildHashValue = (): string => `hash-${crypto.randomUUID()}`;
 
 // Helper to create a mock Mongoose document resembling a UserDocument
 const makeUserDoc = (overrides = {}) => ({
   _id: { toString: () => 'user-id-1' },
   email: 'test@example.com',
-  password: buildHashValue(),
+  password: DEFAULT_HASH,
   name: 'Test User',
   googleId: undefined as string | undefined,
   createdAt: new Date('2024-01-01'),
@@ -45,7 +46,7 @@ describe('MongoUserRepository', () => {
       expect(result?.id).toBe('user-id-1');
       expect(result?.email).toBe('test@example.com');
       expect(result?.name).toBe('Test User');
-      expect(result?.getPasswordHash()).toBeDefined();
+      expect(result?.getPasswordHash()).toBe(DEFAULT_HASH);
     });
 
     it('should map googleId when present', async () => {

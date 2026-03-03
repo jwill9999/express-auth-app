@@ -7,6 +7,7 @@ import type { PasswordHasher } from '../../../src/application/auth/ports/Passwor
 import type { TokenProvider } from '../../../src/application/auth/ports/TokenProvider.js';
 
 const buildStrongCredential = (): string => `Aa1!${crypto.randomUUID()}`;
+const invalidEmailCases = ['bad-email', 'foo@@bar.com', 'foobar.com', 'foo@bar', 'foo@bar.'];
 
 describe('LoginUser Use Case', () => {
   let loginUser: LoginUser;
@@ -69,6 +70,21 @@ describe('LoginUser Use Case', () => {
     await expect(
       loginUser.execute({ email: 'bad-email', password: buildStrongCredential() }),
     ).rejects.toThrow(ValidationError);
+  });
+
+  it.each(invalidEmailCases)(
+    'should throw ValidationError for invalid email: %s',
+    async (email) => {
+      await expect(loginUser.execute({ email, password: buildStrongCredential() })).rejects.toThrow(
+        ValidationError,
+      );
+    },
+  );
+
+  it('should accept minimal valid domain pattern in email', async () => {
+    await expect(
+      loginUser.execute({ email: 'foo@x.y', password: buildStrongCredential() }),
+    ).resolves.toMatchObject({ user: { email: 'test@example.com' } });
   });
 
   it('should throw InvalidCredentialsError when user not found', async () => {

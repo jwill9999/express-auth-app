@@ -11,6 +11,7 @@ const buildNoUppercaseCredential = (): string => `aa1!${crypto.randomUUID()}`;
 const buildNoLowercaseCredential = (): string => ['AA1!', 'ABCDEFGH'].join('');
 const buildNoNumberCredential = (): string => ['Aa', '!', 'abcdefgh'].join('');
 const buildNoSpecialCredential = (): string => ['Aa1', 'abcdefgh'].join('');
+const invalidEmailCases = ['not-an-email', 'foo@@bar.com', 'foobar.com', 'foo@bar', 'foo@bar.'];
 
 describe('RegisterUser Use Case', () => {
   let registerUser: RegisterUser;
@@ -77,6 +78,27 @@ describe('RegisterUser Use Case', () => {
     await expect(
       registerUser.execute({ email: 'not-an-email', password: buildStrongCredential() }),
     ).rejects.toThrow(ValidationError);
+  });
+
+  it.each(invalidEmailCases)(
+    'should throw ValidationError for invalid email: %s',
+    async (email) => {
+      await expect(
+        registerUser.execute({ email, password: buildStrongCredential() }),
+      ).rejects.toThrow(ValidationError);
+    },
+  );
+
+  it('should accept minimal valid domain pattern in email', async () => {
+    await expect(
+      registerUser.execute({ email: 'foo@x.y', password: buildStrongCredential() }),
+    ).resolves.toMatchObject({ user: { email: 'foo@x.y' } });
+  });
+
+  it('should accept longer valid domain pattern in email', async () => {
+    await expect(
+      registerUser.execute({ email: 'foo@xy.z', password: buildStrongCredential() }),
+    ).resolves.toMatchObject({ user: { email: 'foo@xy.z' } });
   });
 
   it('should throw ValidationError for weak password (no uppercase)', async () => {
